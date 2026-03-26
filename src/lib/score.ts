@@ -11,8 +11,11 @@ type Scorer = (d: DerivedData) => number;
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
-/** Clamp a value to [0, 100] */
-const clamp = (v: number) => Math.max(0, Math.min(100, v));
+/** Clamp a value to [0, max] — default 150 to allow magnitude bonuses */
+const clamp = (v: number, max = 150) => Math.max(0, Math.min(max, v));
+
+/** Treat -1 (unknown win rate) as 0 for scoring purposes */
+const wr = (d: DerivedData) => Math.max(d.winRate, 0);
 
 /** Returns score proportional to how far a value exceeds a threshold */
 function exceeds(value: number, threshold: number, scale = 1): number {
@@ -40,6 +43,10 @@ const SCORERS: Record<string, Scorer> = {
     if (d.totalVolumeUsdc > 200_000) s += 20;
     if (d.averageBetSizeUsdc > 500) s += 20;
     if (d.tradeCount < 200 && d.totalVolumeUsdc > 10_000) s += 10;
+    // Magnitude bonus: reward genuinely huge volume so whale beats other 100s
+    if (d.totalVolumeUsdc > 1_000_000) s += 50;
+    else if (d.totalVolumeUsdc > 500_000) s += 35;
+    else if (d.totalVolumeUsdc > 200_000) s += 15;
     return clamp(s);
   },
 
@@ -118,9 +125,10 @@ const SCORERS: Record<string, Scorer> = {
   // ── Cluster 2: Win Rate & P&L ────────────────────────────────────────────
 
   oracle: (d) => {
+    if (d.winRate === -1) return 0; // can't claim oracle without real win rate data
     let s = 0;
-    if (d.winRate > 0.65) s += 60;
-    else if (d.winRate > 0.55) s += 30;
+    if (wr(d) > 0.65) s += 60;
+    else if (wr(d) > 0.55) s += 30;
     if (d.pnlTrend === "up") s += 30;
     if (d.netPnlUsdc > 0) s += 10;
     return clamp(s);
@@ -129,8 +137,9 @@ const SCORERS: Record<string, Scorer> = {
   rekt: (d) => {
     let s = 0;
     if (d.netPnlUsdc < 0) s += 40;
-    if (d.winRate < 0.4) s += 40;
-    if (d.tradeCount > 10) s += 20; // still active despite losses
+    if (d.winRate !== -1 && wr(d) < 0.4) s += 40;
+    else if (d.winRate === -1 && d.netPnlUsdc < -500) s += 20; // infer from losses
+    if (d.tradeCount > 10) s += 20;
     return clamp(s);
   },
 
@@ -202,10 +211,11 @@ const SCORERS: Record<string, Scorer> = {
   },
 
   "contrarian-king": (d) => {
+    if (d.winRate === -1) return 0;
     let s = 0;
     if (d.avgEntryProbability < 0.4) s += 50;
-    if (d.winRate > 0.5) s += 40;
-    if (d.avgEntryProbability < 0.3 && d.winRate > 0.45) s += 10;
+    if (wr(d) > 0.5) s += 40;
+    if (d.avgEntryProbability < 0.3 && wr(d) > 0.45) s += 10;
     return clamp(s);
   },
 
@@ -414,9 +424,9 @@ const SCORERS: Record<string, Scorer> = {
   },
 
   quant: (d) => {
-    // Proxy: profitable with reasonable win rate — suggests finding mispriced markets
+    if (d.winRate === -1) return 0; // quant requires verified win rate
     let s = 0;
-    if (d.winRate > 0.55) s += 50;
+    if (wr(d) > 0.55) s += 50;
     if (d.netPnlUsdc > 0) s += 30;
     if (d.tradeCount > 20) s += 20;
     return clamp(s);
@@ -454,6 +464,10 @@ const SCORERS: Record<string, Scorer> = {
     if (d.accumulativePoints > 10_000) s += 60;
     else if (d.accumulativePoints > 3_000) s += 30;
     if (d.tradeCount > 100) s += 40;
+    // Magnitude bonus: deep history earns higher OG score
+    if (d.accumulativePoints > 100_000) s += 40;
+    else if (d.accumulativePoints > 50_000) s += 25;
+    else if (d.accumulativePoints > 20_000) s += 10;
     return clamp(s);
   },
 

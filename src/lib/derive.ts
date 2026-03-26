@@ -136,18 +136,31 @@ export function deriveData(
   const netPnlUsdc =
     pnlCurve.length > 0 ? pnlCurve[pnlCurve.length - 1] : 0;
 
-  // Win rate from positive deltas
-  let winRate = 0;
-  if (deltas.length > 0) {
-    const wins = deltas.filter((d) => d > 0).length;
-    winRate = wins / deltas.length;
+  // ── Win rate — priority: realisedPnl > resolved tokens > delta fallback ──
+  // -1 = genuinely unknown (not enough data to calculate reliably)
+  let winRate = -1;
+
+  // 1. Best source: positions with actual realised P&L recorded
+  const pnlPositions = clobPositions.filter((pos) => {
+    const yp = Number(pos.positions?.yes?.realisedPnl ?? 0);
+    const np = Number(pos.positions?.no?.realisedPnl ?? 0);
+    return yp !== 0 || np !== 0;
+  });
+  if (pnlPositions.length > 0) {
+    let wins = 0;
+    for (const pos of pnlPositions) {
+      const yp = rawToUsdc(pos.positions?.yes?.realisedPnl ?? "0");
+      const np = rawToUsdc(pos.positions?.no?.realisedPnl ?? "0");
+      if (yp > 0 || np > 0) wins++;
+    }
+    winRate = wins / pnlPositions.length;
   }
 
-  // Also check resolved CLOB positions for win rate
+  // 2. Resolved positions: check who held the winning side
   const resolvedPositions = clobPositions.filter(
     (p) => p.market?.status === "RESOLVED"
   );
-  if (resolvedPositions.length > 0) {
+  if (winRate === -1 && resolvedPositions.length > 0) {
     let resolvedWins = 0;
     for (const pos of resolvedPositions) {
       const winIdx = pos.market.winningOutcomeIndex;
@@ -159,6 +172,13 @@ export function deriveData(
       else if (winIdx === 1 && noHeld) resolvedWins++;
     }
     winRate = resolvedWins / resolvedPositions.length;
+  }
+
+  // 3. Last resort: PnL curve deltas — only use with ≥20 points and cap at 85%
+  //    (fewer points = too noisy; uncapped deltas on profitable wallets = fake 100%)
+  if (winRate === -1 && deltas.length >= 20) {
+    const wins = deltas.filter((d) => d > 0).length;
+    winRate = Math.min(wins / deltas.length, 0.85);
   }
 
   const pnlTrend = detectPnlTrend(pnlCurve);

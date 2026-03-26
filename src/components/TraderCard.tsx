@@ -91,7 +91,7 @@ export function TraderCard({ data }: { data: TraderCardData }) {
 
           {/* Stats Row */}
           <div className="flex items-center gap-3 sm:gap-6">
-            <StatBox label="Win Rate" value={`${stats.winRate}%`} accent={accent} />
+            <StatBox label="Win Rate" value={stats.winRate === -1 ? "—" : `${stats.winRate}%`} accent={accent} />
             <StatBox label="P&L" value={formatUSD(stats.pnl)} accent={accent} />
             <StatBox label="Trades" value={stats.trades.toLocaleString()} accent={accent} />
           </div>

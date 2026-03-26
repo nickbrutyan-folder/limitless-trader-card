@@ -17,7 +17,7 @@ function interpolateMotivation(
   totalVolume: number
 ): string {
   return template
-    .replace("{win_rate}", String(Math.round(stats.winRate)))
+    .replace("{win_rate}", stats.winRate === -1 ? "strong" : String(Math.round(stats.winRate)))
     .replace("{pnl}", `$${Math.abs(stats.pnl).toLocaleString()}`)
     .replace("{trades}", String(stats.trades))
     .replace("{best_trade}", `$${stats.bestTrade.toLocaleString()}`)
@@ -53,7 +53,8 @@ export async function GET(req: NextRequest) {
 
     // Step 5: Build stats for the card display
     const stats: TraderStats = {
-      winRate: Math.round(derived.winRate * 100),
+      // -1 sentinel means "not enough data" — card will show "—"
+      winRate: derived.winRate === -1 ? -1 : Math.round(derived.winRate * 100),
       pnl: Math.round(derived.netPnlUsdc),
       trades: derived.tradeCount,
       bestTrade: Math.round(derived.bestTradeUsdc),
