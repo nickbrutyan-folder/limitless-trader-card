@@ -10,6 +10,7 @@ interface WalletInputProps {
 export function WalletInput({ onSubmit, loading }: WalletInputProps) {
   const [wallet, setWallet] = useState("");
   const [touched, setTouched] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   const isValid = /^0x[0-9a-fA-F]{40}$/.test(wallet.trim());
   const showError = touched && wallet.length > 0 && !isValid;
@@ -26,26 +27,26 @@ export function WalletInput({ onSubmit, loading }: WalletInputProps) {
         <input
           type="text"
           value={wallet}
-          onChange={(e) => {
-            setWallet(e.target.value);
-            setTouched(false);
-          }}
-          onBlur={() => setTouched(true)}
-          placeholder="0x..."
+          onChange={(e) => { setWallet(e.target.value); setTouched(false); }}
+          onBlur={() => { setTouched(true); setFocused(false); }}
+          onFocus={() => setFocused(true)}
+          placeholder="0x…"
           spellCheck={false}
           autoComplete="off"
           disabled={loading}
-          className={`w-full bg-white/[0.04] border rounded-xl px-5 py-4 text-sm font-mono text-white placeholder:text-[#52525B] focus:outline-none focus:ring-1 transition-colors disabled:opacity-50 ${
+          className={`w-full rounded-xl px-5 py-4 text-sm font-mono text-white placeholder:text-[#3F3F46] focus:outline-none transition-all duration-150 disabled:opacity-50 ${
             showError
-              ? "border-red-500/60 focus:ring-red-500/40"
-              : "border-white/10 focus:ring-white/20 focus:border-white/20"
+              ? "border border-red-500/40 bg-red-500/[0.03]"
+              : focused
+              ? "border border-[#dcf68d]/25 bg-white/[0.05]"
+              : "border border-white/[0.07] bg-white/[0.03] hover:border-white/[0.12]"
           }`}
         />
         {wallet.length > 0 && (
           <button
             type="button"
             onClick={() => { setWallet(""); setTouched(false); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#52525B] hover:text-white transition-colors text-lg leading-none"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-[#52525B] hover:text-white transition-colors text-sm leading-none"
           >
             ×
           </button>
@@ -53,7 +54,7 @@ export function WalletInput({ onSubmit, loading }: WalletInputProps) {
       </div>
 
       {showError && (
-        <p className="text-xs text-red-400 px-1">
+        <p className="text-xs text-red-400/70 px-1">
           Enter a valid Ethereum wallet address (0x…)
         </p>
       )}
@@ -61,11 +62,11 @@ export function WalletInput({ onSubmit, loading }: WalletInputProps) {
       <button
         type="submit"
         disabled={loading || !wallet}
-        className="w-full py-4 rounded-xl font-semibold text-sm tracking-wide transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full py-[17px] text-[13px] font-bold tracking-[0.08em] uppercase transition-all duration-150 disabled:opacity-25 disabled:cursor-not-allowed active:scale-[0.98] hover:opacity-90"
         style={{
-          background: "linear-gradient(135deg, #d7ee88 0%, #a8b86a 100%)",
-          color: "#0a0a0a",
-          boxShadow: "0 0 24px rgba(215,238,136,0.15)",
+          background: "#dcf68d",
+          color: "#080808",
+          borderRadius: "10px",
         }}
       >
         {loading ? "Analysing…" : "Reveal My Card"}

@@ -19,8 +19,8 @@ function interpolateMotivation(
   return template
     .replace("{win_rate}", stats.winRate === -1 ? "strong" : String(Math.round(stats.winRate)))
     .replace("{pnl}", `$${Math.abs(stats.pnl).toLocaleString()}`)
-    .replace("{trades}", String(stats.trades))
-    .replace("{best_trade}", `$${stats.bestTrade.toLocaleString()}`)
+    .replace("{trades}", `$${Math.round(totalVolume).toLocaleString()}`)
+    .replace("{best_trade}", `$${stats.bestDay.toLocaleString()}`)
     .replace("{total_volume}", `$${Math.round(totalVolume).toLocaleString()}`);
 }
 
@@ -53,11 +53,10 @@ export async function GET(req: NextRequest) {
 
     // Step 5: Build stats for the card display
     const stats: TraderStats = {
-      // -1 sentinel means "not enough data" — card will show "—"
       winRate: derived.winRate === -1 ? -1 : Math.round(derived.winRate * 100),
       pnl: Math.round(derived.netPnlUsdc),
-      trades: derived.tradeCount,
-      bestTrade: Math.round(derived.bestTradeUsdc),
+      volume: Math.round(derived.totalVolumeUsdc),
+      bestDay: Math.round(derived.bestDayUsdc),
     };
 
     // Step 6: Build motivation text
@@ -73,24 +72,32 @@ export async function GET(req: NextRequest) {
       walletAddress: wallet,
     };
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       cardData,
       motivation,
       derived: {
         totalVolumeUsdc: derived.totalVolumeUsdc,
         winRate: derived.winRate,
+        winRateSource: derived.winRateSource,
         netPnlUsdc: derived.netPnlUsdc,
         tradeCount: derived.tradeCount,
+        activeDays: derived.activeDays,
         dominantCategory: derived.dominantCategory,
         pnlTrend: derived.pnlTrend,
         avgEntryProbability: derived.avgEntryProbability,
       },
       topScore: score,
-      // Include top 5 scores for debugging
       scores: getAllScores(derived)
         .slice(0, 5)
         .map((s) => ({ id: s.card.id, title: s.card.title, score: s.score })),
     });
+
+    // Cache for 5 min — handles bursts of 1000+ users
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=300, stale-while-revalidate=600"
+    );
+    return response;
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "failed to generate card";

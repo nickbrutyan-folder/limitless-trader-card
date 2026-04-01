@@ -90,7 +90,7 @@ const SCORERS: Record<string, Scorer> = {
     if (largest > median * 10) s += 60;
     else if (largest > median * 5) s += 30;
     if (d.tradeCount < 50) s += 30;
-    if (d.bestTradeUsdc > 500) s += 10;
+    if (d.bestDayUsdc > 500) s += 10;
     return clamp(s);
   },
 
@@ -157,7 +157,7 @@ const SCORERS: Record<string, Scorer> = {
 
   "one-hit-wonder": (d) => {
     if (d.pnlCurve.length < 2) return 0;
-    const best = d.bestTradeUsdc;
+    const best = d.bestDayUsdc;
     if (best <= 0) return 0;
     const totalPnl = Math.abs(d.netPnlUsdc);
     if (totalPnl === 0) return 0;
@@ -165,7 +165,7 @@ const SCORERS: Record<string, Scorer> = {
     let s = 0;
     if (dominance > 0.8) s += 80;
     else if (dominance > 0.6) s += 40;
-    if (d.bestTradeUsdc > 100) s += 20;
+    if (d.bestDayUsdc > 100) s += 20;
     return clamp(s);
   },
 

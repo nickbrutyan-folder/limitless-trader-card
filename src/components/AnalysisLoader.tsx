@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const STEPS = [
-  { text: "Pulling your on-chain data…", duration: 700 },
-  { text: "Analysing trade history…", duration: 800 },
-  { text: "Cross-referencing market categories…", duration: 900 },
-  { text: "Calculating win rate & P&L…", duration: 800 },
-  { text: "Measuring position sizing…", duration: 700 },
-  { text: "Identifying your archetype…", duration: 900 },
-  { text: "Rendering your card…", duration: 600 },
+  { text: "Pulling on-chain data", duration: 700 },
+  { text: "Analysing trade history", duration: 800 },
+  { text: "Cross-referencing markets", duration: 900 },
+  { text: "Calculating win rate", duration: 800 },
+  { text: "Measuring positions", duration: 700 },
+  { text: "Identifying archetype", duration: 900 },
+  { text: "Building your card", duration: 600 },
 ];
 
 const TOTAL = STEPS.reduce((a, s) => a + s.duration, 0);
@@ -67,30 +67,23 @@ export function AnalysisLoader({
   const short = wallet.slice(0, 6) + "…" + wallet.slice(-4);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[340px] w-full max-w-md mx-auto px-4">
-      {/* Spinning logo */}
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-        className="w-14 h-14 rounded-2xl mb-8 flex items-center justify-center overflow-hidden"
-      >
-        <img src="/limitless-logo.svg" alt="Limitless" className="w-full h-full" />
-      </motion.div>
+    <div className="flex flex-col items-center justify-center min-h-[300px] w-full max-w-md mx-auto px-4">
 
-      <p className="text-[10px] font-mono tracking-widest mb-5 text-[#52525B] uppercase">
-        analysing {short}
+      {/* Wallet label */}
+      <p className="text-[10px] font-mono tracking-[0.2em] text-[#27272A] uppercase mb-10">
+        {short}
       </p>
 
-      {/* Cycling step text */}
-      <div className="h-7 mb-8 flex items-center">
+      {/* Step text */}
+      <div className="h-5 mb-4 flex items-center justify-center w-full">
         <AnimatePresence mode="wait">
           <motion.p
             key={stepIndex}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.3 }}
-            className="text-sm text-center text-[#A1A1AA]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-[13px] text-center text-[#52525B] font-medium"
           >
             {STEPS[stepIndex]?.text}
           </motion.p>
@@ -98,16 +91,17 @@ export function AnalysisLoader({
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-px bg-white/[0.06] rounded-full overflow-hidden mb-3">
-        <motion.div
-          className="h-full rounded-full"
-          style={{ background: "#d7ee88" }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-        />
+      <div className="w-full max-w-[280px] mb-3">
+        <div className="w-full h-[2px] bg-white/[0.04] rounded-full overflow-hidden">
+          <motion.div
+            className="h-full rounded-full bg-[#dcf68d]"
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          />
+        </div>
       </div>
 
-      <span className="text-[10px] font-mono text-[#3F3F46]">{progress}%</span>
+      <span className="text-[10px] font-mono text-[#27272A] tabular-nums">{progress}%</span>
     </div>
   );
 }

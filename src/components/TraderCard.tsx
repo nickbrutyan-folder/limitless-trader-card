@@ -11,144 +11,133 @@ function formatUSD(value: number): string {
 
 export function TraderCard({ data }: { data: TraderCardData }) {
   const { card, stats, xHandle, xProfilePic } = data;
-  const accent = card.accentColour;
+  const accent = "#dcf68d";
 
   return (
     <div
-      className="group relative w-full max-w-[500px] sm:max-w-[600px] aspect-[16/10] rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02] cursor-default"
+      className="relative w-full max-w-[540px] sm:max-w-[620px] mx-auto rounded-[20px] overflow-hidden"
       style={{
-        background:
-          "linear-gradient(135deg, #1f1f1f 0%, #0d0d0d 50%, #050505 100%)",
-        boxShadow:
-          "0 4px 6px -1px rgba(0,0,0,0.3), 0 25px 50px -12px rgba(0,0,0,0.75), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(0,0,0,0.5)",
+        aspectRatio: "1.65 / 1",
+        background: "linear-gradient(145deg, #111111 0%, #0a0a0a 40%, #060606 100%)",
+        border: "1px solid rgba(255,255,255,0.06)",
       }}
     >
-      {/* Grain Overlay */}
+      {/* Top accent line */}
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay"
+        className="absolute top-0 left-[10%] right-[10%] h-[1px]"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}40, transparent)` }}
+      />
+
+      {/* Noise grain */}
+      <div
+        className="absolute inset-0 opacity-[0.025] pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
         }}
       />
 
-      {/* Metallic Edge Highlight */}
+      {/* Corner accent — subtle diagonal */}
       <div
-        className="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none"
+        className="absolute top-0 right-0 w-[120px] h-[120px] pointer-events-none"
         style={{
-          background:
-            "radial-gradient(120% 120% at 50% -20%, rgba(255,255,255,0.08) 0%, transparent 50%)",
+          background: `linear-gradient(225deg, ${accent}08 0%, transparent 60%)`,
         }}
       />
 
-      <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-between z-10">
+      {/* Content */}
+      <div className="absolute inset-0 p-7 sm:p-9 flex flex-col justify-between z-10">
+
         {/* Top Row */}
-        <div className="flex justify-between items-start w-full">
-          {/* Top Left — Logo + Header */}
-          <div className="flex items-center gap-3 mt-1">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md overflow-hidden bg-black flex items-center justify-center shadow-sm border border-white/5">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2.5">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-[5px] overflow-hidden bg-black/60 flex items-center justify-center border border-white/[0.06]">
               <img
                 src="/limitless-logo.svg"
-                alt="Limitless Logo"
-                className="w-4 h-4 sm:w-5 sm:h-5 object-contain"
+                alt="Limitless"
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain"
               />
             </div>
-            <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] text-[#C4C4CC] uppercase">
-              Limitless Trader Card
+            <span className="text-[8px] sm:text-[9px] font-medium tracking-[0.25em] text-[#3F3F46] uppercase">
+              Trader Card
             </span>
           </div>
 
-          {/* Top Right — Profile Pic + Handle */}
           {xHandle && xProfilePic && (
-            <div className="flex flex-col items-center gap-2">
-              <div
-                className="w-[72px] h-[72px] sm:w-[80px] sm:h-[80px] rounded-full p-[3px] shadow-lg"
-                style={{
-                  background: `linear-gradient(to top right, ${accent}88, ${accent}, ${accent}88)`,
-                }}
-              >
-                <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#0d0d0d]">
-                  <img
-                    src={xProfilePic}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              <span className="text-xs sm:text-sm font-medium tracking-wide text-[#A1A1AA]">
+            <div className="flex items-center gap-2.5">
+              <span className="text-[11px] font-medium text-[#52525B]">
                 @{xHandle}
               </span>
+              <div
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full p-[1.5px]"
+                style={{ background: `linear-gradient(135deg, ${accent}90, ${accent}30)` }}
+              >
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <img src={xProfilePic} alt="" className="w-full h-full object-cover" />
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col gap-6 sm:gap-8 mt-auto mb-auto">
-          {/* Card Title */}
+        {/* Center — Title */}
+        <div className="flex flex-col gap-6 sm:gap-7">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#E4E4E7] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+            <h1
+              className="text-[32px] sm:text-[40px] font-extrabold tracking-[-0.03em] leading-none text-[#E4E4E7]"
+            >
               {card.title}
             </h1>
           </div>
 
-          {/* Stats Row */}
-          <div className="flex items-center gap-3 sm:gap-6">
-            <StatBox label="Win Rate" value={stats.winRate === -1 ? "—" : `${stats.winRate}%`} accent={accent} />
-            <StatBox label="P&L" value={formatUSD(stats.pnl)} accent={accent} />
-            <StatBox label="Trades" value={stats.trades.toLocaleString()} accent={accent} />
+          {/* Stats */}
+          <div className="flex items-end gap-7 sm:gap-9">
+            <Stat label="Win Rate" value={stats.winRate === -1 ? "—" : `${stats.winRate}%`} accent={accent} />
+            <Stat label="P&L" value={formatUSD(stats.pnl)} accent={accent} />
+            <Stat label="Volume" value={formatUSD(stats.volume)} accent={accent} />
           </div>
         </div>
 
         {/* Bottom Row */}
-        <div className="flex justify-between items-end mt-4">
-          {/* Best Trade */}
-          <div className="flex items-center text-[10px] sm:text-xs font-light bg-white/[0.03] rounded-md px-3 py-1.5 border border-white/[0.02]">
-            <span className="text-[#A1A1AA] font-medium">Best Trade: </span>
+        <div className="flex justify-between items-end">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[9px] sm:text-[10px] font-medium text-[#3F3F46] uppercase tracking-wider">
+              Best Day
+            </span>
             <span
-              className="ml-1.5 font-semibold text-xs sm:text-sm flex items-center gap-1"
-              style={{
-                color: accent,
-                filter: `drop-shadow(0 0 4px ${accent}33)`,
-              }}
+              className="text-sm sm:text-[15px] font-bold tabular-nums"
+              style={{ color: accent }}
             >
-              <span className="text-[10px] leading-none">▲</span> +{formatUSD(stats.bestTrade)}
+              +{formatUSD(stats.bestDay)}
             </span>
           </div>
 
-          {/* Footer */}
-          <div className="flex items-center pb-1">
-            <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-[#52525B]">
-              limitless.exchange
-            </span>
-          </div>
+          <span className="text-[8px] font-medium tracking-[0.25em] uppercase text-[#27272A]">
+            limitless.exchange
+          </span>
         </div>
       </div>
-
-      {/* Diagonal Shine on Hover */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.04] to-transparent transform -skew-x-12 translate-x-[-150%] group-hover:translate-x-[200%] transition-transform duration-[1.5s] ease-in-out pointer-events-none" />
     </div>
   );
 }
 
-function StatBox({
+function Stat({
   label,
   value,
   accent,
 }: {
   label: string;
   value: string;
-  accent: string;
+  accent?: string;
 }) {
   return (
-    <div className="flex flex-col items-start bg-white/[0.03] rounded-lg px-4 py-2 border border-white/[0.02]">
+    <div className="flex flex-col">
       <span
-        className="text-2xl sm:text-3xl font-semibold tracking-tight"
-        style={{
-          color: accent,
-          filter: `drop-shadow(0 0 8px ${accent}33)`,
-        }}
+        className="text-[22px] sm:text-[28px] font-bold tracking-[-0.02em] leading-none tabular-nums"
+        style={{ color: accent ?? "#E4E4E7" }}
       >
         {value}
       </span>
-      <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-[#A1A1AA] mt-1">
+      <span className="text-[8px] sm:text-[9px] font-medium uppercase tracking-[0.2em] text-[#3F3F46] mt-1.5">
         {label}
       </span>
     </div>

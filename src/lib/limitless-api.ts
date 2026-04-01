@@ -98,7 +98,7 @@ export interface PositionsResponse {
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url, {
-    next: { revalidate: 60 },
+    next: { revalidate: 300 }, // cache for 5 min — handles 1000+ concurrent users
     headers: { Accept: "application/json" },
   });
   if (!res.ok) {

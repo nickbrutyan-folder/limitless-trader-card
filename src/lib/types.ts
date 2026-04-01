@@ -7,10 +7,10 @@ export interface CardConfig {
 }
 
 export interface TraderStats {
-  winRate: number;       // percentage, e.g. 68
-  pnl: number;          // USDC value, e.g. 12400
-  trades: number;       // total trade count
-  bestTrade: number;    // USDC value of best single trade
+  winRate: number;       // percentage (e.g. 68), or -1 = not enough data
+  pnl: number;          // net P&L in USDC
+  volume: number;       // total traded volume in USDC
+  bestDay: number;      // largest single-day P&L gain in USDC
 }
 
 export interface TraderCardData {
