@@ -95,16 +95,24 @@ export default function Home() {
       setMotivation(data.motivation);
       setStage("revealing");
       setIsCharging(false);
-      setShowFlash(true);
 
       // Clear any previous reveal timeouts before scheduling new ones
       revealTimeouts.current.forEach(clearTimeout);
+
+      // Smooth sequence: flash bloom → card materializes → subtle shake → settle
       revealTimeouts.current = [
-        setTimeout(() => setShowFlash(false), 600),
-        setTimeout(() => setIsFlipped(true), 100),
-        setTimeout(() => setShaking(true), 200),
-        setTimeout(() => setShaking(false), 500),
-        setTimeout(() => setStage("result"), 1100),
+        // t=0ms: soft flash bloom begins
+        setTimeout(() => setShowFlash(true), 0),
+        // t=200ms: card flips while flash is peaking — the brightness covers the swap
+        setTimeout(() => setIsFlipped(true), 200),
+        // t=500ms: gentle shake as card spring-settles
+        setTimeout(() => setShaking(true), 500),
+        // t=750ms: shake ends
+        setTimeout(() => setShaking(false), 750),
+        // t=800ms: flash has fully faded by now
+        setTimeout(() => setShowFlash(false), 800),
+        // t=1400ms: transition to interactive result state (let spring finish)
+        setTimeout(() => setStage("result"), 1400),
       ];
     },
     []
@@ -238,22 +246,22 @@ export default function Home() {
       {/* Ambient particle field */}
       <ParticleField intensity={particleIntensity} />
 
-      {/* Flash overlay on reveal */}
+      {/* Flash overlay on reveal — soft bloom */}
       <AnimatePresence>
         {showFlash && (
           <motion.div
             key="flash"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.7, 0.5, 0] }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.8, times: [0, 0.15, 0.4, 1], ease: "easeOut" }}
             className="fixed inset-0 z-50 pointer-events-none"
           >
             <div
               className="absolute inset-0"
               style={{
                 background:
-                  "radial-gradient(circle at 50% 45%, #DCF58C 0%, rgba(220,245,140,0.4) 30%, transparent 70%)",
+                  "radial-gradient(ellipse 70% 60% at 50% 42%, rgba(220,245,140,0.6) 0%, rgba(220,245,140,0.2) 40%, transparent 70%)",
               }}
             />
           </motion.div>

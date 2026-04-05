@@ -436,7 +436,11 @@ const SCORERS: Record<string, Scorer> = {
     const veryLowProb = d.entryProbabilities.filter((p) => p < 0.1).length;
     const total = d.entryProbabilities.length;
     if (total === 0) return 0;
-    return clamp((veryLowProb / total) * 100);
+    let s = (veryLowProb / total) * 100;
+    // Bonus: ultra-low entries distinguish degen from moonshot
+    const ultraLow = d.entryProbabilities.filter((p) => p < 0.05).length;
+    if (ultraLow / total > 0.5) s += 10;
+    return clamp(s);
   },
 
   "efficiency-trader": (d) => {
