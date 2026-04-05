@@ -7,11 +7,11 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CardSceneProps {
   flipped: boolean;
-  spinning: boolean;
+  charging: boolean;
   interactive: boolean;
   floating: boolean;
   children: [ReactNode, ReactNode]; // [back, front]
@@ -19,7 +19,7 @@ interface CardSceneProps {
 
 export function CardScene({
   flipped,
-  spinning,
+  charging,
   interactive,
   floating,
   children,
@@ -82,54 +82,54 @@ export function CardScene({
           : { duration: 0.5 }
       }
       className="w-full max-w-[540px] sm:max-w-[620px]"
-      style={{ perspective: "1200px" }}
     >
       <div ref={containerRef} className="relative">
-        {/* Layer 1 — tilt (pointer-driven in result stage) */}
+        {/* Single tilt layer — only active in result state */}
         <motion.div
           animate={{
             rotateX: interactive ? tilt.x : 0,
             rotateY: interactive ? tilt.y : 0,
           }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          style={{ transformStyle: "preserve-3d" }}
+          style={{ perspective: "1200px" }}
         >
-          {/* Layer 2 — spin (CSS animation during loading) */}
+          {/* Aspect-ratio container */}
           <div
-            className={spinning ? "card-spin" : undefined}
-            style={{ transformStyle: "preserve-3d" }}
+            className="relative w-full"
+            style={{ aspectRatio: "1.65 / 1" }}
           >
-            {/* Layer 3 — flip (framer-motion 0→180) */}
-            <motion.div
-              animate={{ rotateY: flipped ? 180 : 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              {/* Aspect-ratio container */}
-              <div
-                className="relative w-full"
-                style={{ aspectRatio: "1.65 / 1" }}
-              >
-                {/* Back face */}
-                <div
+            {/* Card faces — crossfade via scaleX flip */}
+            <AnimatePresence mode="wait">
+              {!flipped ? (
+                <motion.div
+                  key="back"
                   className="absolute inset-0"
-                  style={{ backfaceVisibility: "hidden" }}
+                  initial={false}
+                  exit={{ scaleX: 0, opacity: 0.8 }}
+                  transition={{ duration: 0.25, ease: [0.4, 0, 1, 1] }}
                 >
                   {children[0]}
-                </div>
-
-                {/* Front face */}
-                <div
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="front"
                   className="absolute inset-0"
-                  style={{
-                    backfaceVisibility: "hidden",
-                    transform: "rotateY(180deg)",
-                  }}
+                  initial={{ scaleX: 0, opacity: 0.8 }}
+                  animate={{ scaleX: 1, opacity: 1 }}
+                  transition={{ duration: 0.35, ease: [0, 0, 0.2, 1] }}
                 >
                   {children[1]}
-                </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Charging glow border — during loading */}
+            {charging && (
+              <div className="absolute inset-0 rounded-[20px] pointer-events-none z-10">
+                <div className="absolute inset-0 rounded-[20px] card-charge-border" />
+                <div className="absolute inset-0 rounded-[20px] card-scan-line" />
               </div>
-            </motion.div>
+            )}
           </div>
         </motion.div>
 
@@ -157,10 +157,10 @@ export function CardScene({
         )}
 
         {/* Ambient accent glow behind card */}
-        {(flipped || spinning) && (
+        {(flipped || charging) && (
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: spinning ? 0.15 : 0.08 }}
+            animate={{ opacity: charging ? 0.15 : 0.08 }}
             className="absolute inset-0 -z-10 blur-3xl rounded-full"
             style={{ background: "#DCF58C", transform: "scale(0.8)" }}
           />

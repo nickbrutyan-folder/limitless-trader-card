@@ -41,7 +41,7 @@ export default function Home() {
   // Card scene state
   const [showFlash, setShowFlash] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isSpinning, setIsSpinning] = useState(false);
+  const [isCharging, setIsCharging] = useState(false);
   const [shaking, setShaking] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -74,7 +74,7 @@ export default function Home() {
     setError("");
     setStepIndex(0);
     setIsFlipped(false);
-    setIsSpinning(true);
+    setIsCharging(true);
     setCopyState("idle");
 
     apiPromiseRef.current = fetch(
@@ -94,7 +94,7 @@ export default function Home() {
       setCardData(data.cardData);
       setMotivation(data.motivation);
       setStage("revealing");
-      setIsSpinning(false);
+      setIsCharging(false);
       setShowFlash(true);
 
       // Clear any previous reveal timeouts before scheduling new ones
@@ -121,7 +121,7 @@ export default function Home() {
     setError("");
     setCopyState("idle");
     setIsFlipped(false);
-    setIsSpinning(false);
+    setIsCharging(false);
     setShaking(false);
     setShowFlash(false);
   }
@@ -163,7 +163,7 @@ export default function Home() {
         if (cancelled) return;
         // Don't show abort errors as user-facing errors
         if (e instanceof DOMException && e.name === "AbortError") return;
-        setIsSpinning(false);
+        setIsCharging(false);
         setError(e instanceof Error ? e.message : "Something went wrong");
         setStage("error");
       } finally {
@@ -287,7 +287,7 @@ export default function Home() {
         {showCard && (
           <CardScene
             flipped={isFlipped}
-            spinning={isSpinning}
+            charging={isCharging}
             interactive={stage === "result"}
             floating={stage === "landing"}
           >
