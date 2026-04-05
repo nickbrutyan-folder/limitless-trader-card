@@ -84,7 +84,7 @@ export function CardScene({
       className="w-full max-w-[540px] sm:max-w-[620px]"
     >
       <div ref={containerRef} className="relative">
-        {/* Single tilt layer — only active in result state */}
+        {/* Tilt layer — only active in result state */}
         <motion.div
           animate={{
             rotateX: interactive ? tilt.x : 0,
@@ -98,15 +98,24 @@ export function CardScene({
             className="relative w-full"
             style={{ aspectRatio: "1.65 / 1" }}
           >
-            {/* Card faces — crossfade via scaleX flip */}
+            {/* Card faces — smooth reveal with scale + fade */}
             <AnimatePresence mode="wait">
               {!flipped ? (
                 <motion.div
                   key="back"
                   className="absolute inset-0"
                   initial={false}
-                  exit={{ scaleX: 0, opacity: 0.8 }}
-                  transition={{ duration: 0.25, ease: [0.4, 0, 1, 1] }}
+                  animate={charging ? { scale: [1, 1.015, 1] } : { scale: 1 }}
+                  exit={{
+                    scale: 0.92,
+                    opacity: 0,
+                    filter: "brightness(2)",
+                  }}
+                  transition={
+                    charging
+                      ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" }
+                      : { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+                  }
                 >
                   {children[0]}
                 </motion.div>
@@ -114,28 +123,51 @@ export function CardScene({
                 <motion.div
                   key="front"
                   className="absolute inset-0"
-                  initial={{ scaleX: 0, opacity: 0.8 }}
-                  animate={{ scaleX: 1, opacity: 1 }}
-                  transition={{ duration: 0.35, ease: [0, 0, 0.2, 1] }}
+                  initial={{ scale: 0.88, opacity: 0, filter: "brightness(1.8)" }}
+                  animate={{ scale: 1, opacity: 1, filter: "brightness(1)" }}
+                  transition={{
+                    duration: 0.6,
+                    ease: [0.16, 1, 0.3, 1],
+                    scale: {
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 22,
+                      mass: 0.8,
+                    },
+                    opacity: { duration: 0.3, ease: "easeOut" },
+                  }}
                 >
                   {children[1]}
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Charging glow border — during loading */}
-            {charging && (
-              <div className="absolute inset-0 rounded-[20px] pointer-events-none z-10">
-                <div className="absolute inset-0 rounded-[20px] card-charge-border" />
-                <div className="absolute inset-0 rounded-[20px] card-scan-line" />
-              </div>
-            )}
+            {/* Charging effects — pulsing border + scan line */}
+            <AnimatePresence>
+              {charging && (
+                <motion.div
+                  className="absolute inset-0 rounded-[20px] pointer-events-none z-10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute inset-0 rounded-[20px] card-charge-border" />
+                  <div className="absolute inset-0 rounded-[20px] card-scan-line" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
 
         {/* Holographic overlay — only in interactive (result) state */}
         {interactive && (
-          <div className="absolute inset-0 rounded-[20px] overflow-hidden pointer-events-none z-20">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="absolute inset-0 rounded-[20px] overflow-hidden pointer-events-none z-20"
+          >
             {/* Rainbow refraction */}
             <div
               className="absolute inset-0 opacity-[0.07]"
@@ -153,18 +185,29 @@ export function CardScene({
                 background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.12) 0%, transparent 50%)`,
               }}
             />
-          </div>
+          </motion.div>
         )}
 
         {/* Ambient accent glow behind card */}
-        {(flipped || charging) && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: charging ? 0.15 : 0.08 }}
-            className="absolute inset-0 -z-10 blur-3xl rounded-full"
-            style={{ background: "#DCF58C", transform: "scale(0.8)" }}
-          />
-        )}
+        <AnimatePresence>
+          {(flipped || charging) && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{
+                opacity: charging ? 0.18 : 0.1,
+                scale: charging ? [0.75, 0.85, 0.75] : 0.8,
+              }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={
+                charging
+                  ? { opacity: { duration: 0.5 }, scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" } }
+                  : { duration: 0.6 }
+              }
+              className="absolute inset-0 -z-10 blur-3xl rounded-full"
+              style={{ background: "#DCF58C" }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
