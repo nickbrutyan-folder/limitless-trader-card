@@ -279,11 +279,12 @@ export default function Home() {
           {stage === "landing" && (
             <motion.h1
               key="title"
+              layout
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -10, height: 0, marginBottom: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-4xl sm:text-5xl font-bold leading-[1.1] mb-8 text-center"
+              className="text-4xl sm:text-5xl font-bold leading-[1.1] mb-8 text-center overflow-hidden"
               style={{ color: "#E4E4E7", letterSpacing: "-0.025em" }}
             >
               What kind of trader are you?
@@ -292,21 +293,23 @@ export default function Home() {
         </AnimatePresence>
 
         {/* ── Card scene (persists across landing → loading → reveal → result) ── */}
-        {showCard && (
-          <CardScene
-            flipped={isFlipped}
-            charging={isCharging}
-            interactive={stage === "result"}
-            floating={stage === "landing"}
-          >
-            <CardBack />
-            {cardData ? (
-              <TraderCard data={cardData} />
-            ) : (
-              <div className="w-full h-full" />
-            )}
-          </CardScene>
-        )}
+        <motion.div layout transition={{ type: "spring", stiffness: 200, damping: 28, mass: 0.8 }}>
+          {showCard && (
+            <CardScene
+              flipped={isFlipped}
+              charging={isCharging}
+              interactive={stage === "result"}
+              floating={stage === "landing"}
+            >
+              <CardBack />
+              {cardData ? (
+                <TraderCard data={cardData} />
+              ) : (
+                <div className="w-full h-full" />
+              )}
+            </CardScene>
+          )}
+        </motion.div>
 
         {/* ── Below-card content (transitions between stages) ── */}
         <AnimatePresence mode="wait">
@@ -317,7 +320,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ delay: 0.1, duration: 0.4 }}
+              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
               className="mt-8 w-full flex flex-col items-center"
             >
               <WalletInput onSubmit={handleSubmit} loading={false} />

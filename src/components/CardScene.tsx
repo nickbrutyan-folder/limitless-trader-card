@@ -79,7 +79,7 @@ export function CardScene({
       transition={
         floating
           ? { duration: 3, repeat: Infinity, ease: "easeInOut" }
-          : { duration: 0.5 }
+          : { type: "spring", stiffness: 120, damping: 20, mass: 0.8 }
       }
       className="w-full max-w-[540px] sm:max-w-[620px]"
     >
