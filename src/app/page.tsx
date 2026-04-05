@@ -307,122 +307,122 @@ export default function Home() {
 
       {/* Main content */}
       <main
-        className={`relative z-10 flex-1 flex flex-col items-center px-6 sm:px-10 ${
+        className={`relative z-10 flex-1 flex flex-col items-center justify-center px-6 sm:px-10 ${
           shaking ? "screen-shake" : ""
         }`}
       >
-        {/* Spacer pushes card to visual center — card never moves */}
-        <div className="flex-1" />
-
-        {/* ── Title (landing only) ── */}
-        <AnimatePresence>
-          {stage === "landing" && (
-            <motion.div
-              key="title-block"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="mb-8 text-center"
-            >
-              <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-[#3F3F46] mb-3">
-                Trader Identity
-              </p>
-              <h1
-                className="text-4xl sm:text-5xl font-bold leading-[1.1]"
-                style={{ color: "#E4E4E7", letterSpacing: "-0.025em" }}
+        {/* ── Card scene — fixed anchor, always vertically centered ── */}
+        <div className="relative w-full flex flex-col items-center">
+          {/* Title floats above card — absolutely positioned so it doesn't shift layout */}
+          <AnimatePresence>
+            {stage === "landing" && (
+              <motion.div
+                key="title-block"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute bottom-full mb-8 left-0 right-0 text-center"
               >
-                What kind of trader are you?
-              </h1>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── Card scene — the fixed anchor point ── */}
-        {showCard && (
-          <CardScene
-            flipped={isFlipped}
-            charging={isCharging}
-            interactive={stage === "result"}
-            floating={stage === "landing"}
-          >
-            <CardBack />
-            {cardData ? (
-              <TraderCard data={cardData} />
-            ) : (
-              <div className="w-full h-full" />
+                <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-[#3F3F46] mb-3">
+                  Trader Identity
+                </p>
+                <h1
+                  className="text-4xl sm:text-5xl font-bold leading-[1.1]"
+                  style={{ color: "#E4E4E7", letterSpacing: "-0.025em" }}
+                >
+                  What kind of trader are you?
+                </h1>
+              </motion.div>
             )}
-          </CardScene>
-        )}
+          </AnimatePresence>
 
-        {/* ── Below-card content (transitions between stages) ── */}
-        <AnimatePresence mode="wait">
-          {/* Landing: wallet input */}
-          {stage === "landing" && (
-            <motion.div
-              key="landing"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="mt-8 w-full flex flex-col items-center"
+          {/* Card */}
+          {showCard && (
+            <CardScene
+              flipped={isFlipped}
+              charging={isCharging}
+              interactive={stage === "result"}
+              floating={stage === "landing"}
             >
-              <WalletInput onSubmit={handleSubmit} loading={false} />
-
-              <div className="flex flex-wrap gap-3 justify-center mt-5">
-                <span className="text-[11px] font-mono text-[#3F3F46]">
-                  try:
-                </span>
-                {EXAMPLE_WALLETS.map((w) => (
-                  <button
-                    key={w}
-                    onClick={() => handleSubmit(w)}
-                    className="text-[11px] font-mono text-[#52525B] hover:text-[#A1A1AA] transition-colors duration-150"
-                  >
-                    {w.slice(0, 8)}…
-                  </button>
-                ))}
-              </div>
-            </motion.div>
+              <CardBack />
+              {cardData ? (
+                <TraderCard data={cardData} />
+              ) : (
+                <div className="w-full h-full" />
+              )}
+            </CardScene>
           )}
 
-          {/* Loading / Revealing: analysis step text */}
-          {(stage === "loading" || stage === "revealing") && (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="mt-8 flex flex-col items-center gap-3"
-            >
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={stepIndex}
+          {/* Below-card content floats below — absolutely positioned */}
+          <div className="absolute top-full left-0 right-0">
+            <AnimatePresence mode="wait">
+              {/* Landing: wallet input */}
+              {stage === "landing" && (
+                <motion.div
+                  key="landing"
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                  className="mt-8 w-full flex flex-col items-center"
+                >
+                  <WalletInput onSubmit={handleSubmit} loading={false} />
+
+                  <div className="flex flex-wrap gap-3 justify-center mt-5">
+                    <span className="text-[11px] font-mono text-[#3F3F46]">
+                      try:
+                    </span>
+                    {EXAMPLE_WALLETS.map((w) => (
+                      <button
+                        key={w}
+                        onClick={() => handleSubmit(w)}
+                        className="text-[11px] font-mono text-[#52525B] hover:text-[#A1A1AA] transition-colors duration-150"
+                      >
+                        {w.slice(0, 8)}…
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Loading / Revealing: analysis step text */}
+              {(stage === "loading" || stage === "revealing") && (
+                <motion.div
+                  key="loading"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-[13px] text-[#52525B] font-medium text-center"
+                  className="mt-8 flex flex-col items-center gap-3"
                 >
-                  {ANALYSIS_STEPS[stepIndex]}
-                </motion.p>
-              </AnimatePresence>
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={stepIndex}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="text-[13px] text-[#52525B] font-medium text-center"
+                    >
+                      {ANALYSIS_STEPS[stepIndex]}
+                    </motion.p>
+                  </AnimatePresence>
 
-              <p className="text-[10px] font-mono text-[#27272A]">
-                {wallet.slice(0, 6)}…{wallet.slice(-4)}
-              </p>
-            </motion.div>
-          )}
+                  <p className="text-[10px] font-mono text-[#27272A]">
+                    {wallet.slice(0, 6)}…{wallet.slice(-4)}
+                  </p>
+                </motion.div>
+              )}
 
-          {/* Result: motivation + action buttons */}
-          {stage === "result" && cardData && (
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.5 }}
-              className="mt-6 flex flex-col items-center w-full max-w-2xl"
-            >
+              {/* Result: motivation + action buttons */}
+              {stage === "result" && cardData && (
+                <motion.div
+                  key="result"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15, duration: 0.5 }}
+                  className="mt-6 flex flex-col items-center w-full max-w-2xl mx-auto"
+                >
               {/* Motivation quote */}
               <p className="max-w-[540px] text-center text-sm text-[#52525B] italic leading-relaxed">
                 &ldquo;{motivation}&rdquo;
@@ -544,9 +544,8 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Bottom spacer — mirrors top spacer to keep card vertically centered */}
-        <div className="flex-1" />
+          </div>
+        </div>
       </main>
 
       {/* Hidden off-screen card for html2canvas screenshot */}
