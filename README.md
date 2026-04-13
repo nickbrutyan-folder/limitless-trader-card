@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Limitless Trader Cards
+
+Social card generator that analyses on-chain trading activity on [Limitless Exchange](https://limitless.exchange), classifies traders into one of **48 archetypes**, and renders a shareable card with real stats.
+
+## How It Works
+
+1. User pastes their wallet address
+2. App fetches portfolio data from the Limitless public API (volume, positions, P&L chart)
+3. A scoring engine evaluates ~20 derived data points against 48 archetype scorers
+4. The highest-scoring archetype is selected and rendered as a card with the trader's real stats
+
+## 48 Archetypes
+
+Archetypes are grouped into 7 clusters:
+
+| Cluster | Cards | Examples |
+|---------|-------|---------|
+| Volume & Size | 8 | The Whale, The Shrimp, The Sniper |
+| Win Rate & P&L | 9 | The Oracle, The Comeback Kid, The Rekt |
+| Frequency & Timing | 5 | The Scout, The Grinder, The Closer |
+| Market Category | 10 | The Crypto Maximalist, The Sports Bettor |
+| Position & Hold | 5 | The Diamond Hands, The Hedger |
+| Probability Preference | 6 | The Moonshot, The Degen, The Quant |
+| Ecosystem Engagement | 5 | The OG, The Point Farmer |
+
+## Tech Stack
+
+- **Next.js 16** (App Router, Turbopack)
+- **Tailwind CSS v4**
+- **Framer Motion** — page transitions and animations
+- **html2canvas** — copy-to-clipboard / save-as-image
+- **Limitless Exchange API** — public REST endpoints, no API key required
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── page.tsx              # Main page (landing -> loading -> result)
+│   └── api/
+│       ├── generate/route.ts # Orchestration: fetch -> derive -> classify -> respond
+│       └── debug/route.ts    # Raw API response viewer
+├── components/
+│   ├── TraderCard.tsx        # The card component
+│   ├── WalletInput.tsx       # Wallet address input
+│   ├── AnalysisLoader.tsx    # Loading screen with progress bar
+│   └── DotCanvas.tsx         # Animated background
+└── lib/
+    ├── limitless-api.ts      # Typed API client for Limitless endpoints
+    ├── derive.ts             # Derives ~20 data points from raw API responses
+    ├── score.ts              # 48 scorer functions + classification engine
+    ├── cards.ts              # Card configs (title, motivation template, cluster)
+    └── types.ts              # Shared TypeScript interfaces
+```
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Opens at [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+No environment variables or API keys needed — the Limitless API is public.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deploy
 
-## Learn More
+One-click deploy to Vercel:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx vercel
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Or connect this repo to Vercel via the dashboard. No build configuration needed — Next.js is auto-detected.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Endpoints
 
-## Deploy on Vercel
+### `GET /api/generate?wallet=0x...`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Returns the classified card data, motivation text, derived stats, and top 5 archetype scores.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### `GET /api/debug?wallet=0x...`
+
+Returns raw responses from all 3 Limitless API endpoints for debugging.
+
+## Caching
+
+- Limitless API responses are cached for 5 minutes via Next.js `revalidate`
+- Generate endpoint returns `Cache-Control: public, s-maxage=300, stale-while-revalidate=600`
+- Same wallet won't re-hit the Limitless API within the cache window
