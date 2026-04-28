@@ -11,7 +11,7 @@ function formatUSD(value: number): string {
 
 export function TraderCard({ data }: { data: TraderCardData }) {
   const { card, stats, xHandle, xProfilePic } = data;
-  const accent = "#DCF58C";
+  const accent = "#c3ff00";
 
   return (
     <div

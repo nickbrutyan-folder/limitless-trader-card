@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface WalletInputProps {
   onSubmit: (wallet: string) => void;
   loading: boolean;
+  prefill?: string;
 }
 
-export function WalletInput({ onSubmit, loading }: WalletInputProps) {
-  const [wallet, setWallet] = useState("");
+export function WalletInput({ onSubmit, loading, prefill }: WalletInputProps) {
+  const [wallet, setWallet] = useState(prefill ?? "");
   const [touched, setTouched] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (prefill) {
+      setWallet(prefill);
+      setTouched(false);
+    }
+  }, [prefill]);
 
   const isValid = /^0x[0-9a-fA-F]{40}$/.test(wallet.trim());
   const showError = touched && wallet.length > 0 && !isValid;
@@ -24,7 +32,8 @@ export function WalletInput({ onSubmit, loading }: WalletInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-lg flex flex-col gap-3 rounded-2xl p-5 bg-white/[0.02] backdrop-blur-xl border border-white/[0.05]"
+      className="w-full max-w-lg flex flex-col gap-3 rounded-2xl p-5 border border-black/[0.08]"
+      style={{ background: "rgba(0,0,0,0.02)" }}
     >
       <div className="relative">
         <input
@@ -39,16 +48,16 @@ export function WalletInput({ onSubmit, loading }: WalletInputProps) {
             setFocused(false);
           }}
           onFocus={() => setFocused(true)}
-          placeholder="0x…"
+          placeholder="Add wallet e.g. 0xE6Ea72D7...1a81b5"
           spellCheck={false}
           autoComplete="off"
           disabled={loading}
-          className={`w-full rounded-xl px-5 py-4 text-sm font-mono text-white placeholder:text-[#3F3F46] focus:outline-none transition-all duration-150 disabled:opacity-50 ${
+          className={`w-full rounded-full px-5 py-4 text-sm text-black placeholder:text-black/30 focus:outline-none transition-all duration-150 disabled:opacity-50 ${
             showError
               ? "border border-red-500/40 bg-red-500/[0.03]"
               : focused
-              ? "border border-[#DCF58C]/25 bg-white/[0.05]"
-              : "border border-white/[0.07] bg-white/[0.03] hover:border-white/[0.12]"
+              ? "border border-black/20 bg-black/[0.03]"
+              : "border border-black/[0.08] bg-black/[0.02] hover:border-black/15"
           }`}
         />
         {wallet.length > 0 && (
@@ -58,7 +67,7 @@ export function WalletInput({ onSubmit, loading }: WalletInputProps) {
               setWallet("");
               setTouched(false);
             }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-[#52525B] hover:text-white transition-colors text-sm leading-none"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-black/30 hover:text-black transition-colors text-sm leading-none"
           >
             ×
           </button>
@@ -74,11 +83,11 @@ export function WalletInput({ onSubmit, loading }: WalletInputProps) {
       <button
         type="submit"
         disabled={loading || !isValid}
-        className="w-full py-[17px] text-[13px] font-bold tracking-[0.08em] uppercase transition-all duration-150 disabled:opacity-25 disabled:cursor-not-allowed active:scale-[0.98] hover:opacity-90"
+        className="w-full py-[17px] text-[13px] font-bold tracking-[0.08em] uppercase transition-all duration-150 active:scale-[0.98] hover:opacity-90"
         style={{
-          background: "#DCF58C",
+          background: "#c3ff00",
           color: "#080808",
-          borderRadius: "10px",
+          borderRadius: "9999px",
         }}
       >
         {loading ? "Analysing…" : "Reveal My Card"}

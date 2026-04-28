@@ -1,14 +1,15 @@
 @import "tailwindcss";
 
+
 @theme inline {
-  --color-background: #050505;
-  --color-foreground: #E4E4E7;
-  --color-accent: #DCF58C;
+  --color-background: #FFFFFF;
+  --color-foreground: #000000;
+  --color-accent: #c3ff00;
   --color-muted: #A1A1AA;
   --color-subtle: #52525B;
   --color-card-bg: #0d0d0d;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-inter);
 }
 
 body {
@@ -30,33 +31,25 @@ body {
   animation: holo-shimmer 4s ease-in-out infinite;
 }
 
-/* Charging border glow — pulses during loading */
+/* Charging border — pulses during loading */
 @keyframes charge-border {
   0%, 100% {
-    box-shadow:
-      inset 0 0 0 1px rgba(220, 245, 140, 0.06),
-      0 0 12px rgba(220, 245, 140, 0.03);
+    border-color: rgba(195, 255, 0, 0.06);
   }
   50% {
-    box-shadow:
-      inset 0 0 0 1.5px rgba(220, 245, 140, 0.3),
-      0 0 25px rgba(220, 245, 140, 0.1),
-      0 0 50px rgba(220, 245, 140, 0.05),
-      0 0 80px rgba(220, 245, 140, 0.02);
+    border-color: rgba(195, 255, 0, 0.3);
   }
 }
 
 .card-charge-border {
+  border: 1.5px solid rgba(195, 255, 0, 0.06);
   animation: charge-border 2s ease-in-out infinite;
 }
 
 /* Scanning light bar that sweeps down the card */
 @keyframes scan-line {
-  0%   { top: -2%; opacity: 0; }
-  8%   { opacity: 0.6; }
-  50%  { opacity: 1; }
-  92%  { opacity: 0.6; }
-  100% { top: 102%; opacity: 0; }
+  0%   { top: -2%; }
+  100% { top: 102%; }
 }
 
 .card-scan-line {
@@ -73,16 +66,13 @@ body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(220, 245, 140, 0.3) 15%,
-    rgba(220, 245, 140, 0.7) 40%,
-    rgba(220, 245, 140, 1) 50%,
-    rgba(220, 245, 140, 0.7) 60%,
-    rgba(220, 245, 140, 0.3) 85%,
+    rgba(195, 255, 0, 0.3) 15%,
+    rgba(195, 255, 0, 0.7) 40%,
+    rgba(195, 255, 0, 1) 50%,
+    rgba(195, 255, 0, 0.7) 60%,
+    rgba(195, 255, 0, 0.3) 85%,
     transparent 100%
   );
-  box-shadow:
-    0 0 8px 2px rgba(220, 245, 140, 0.12),
-    0 0 20px 4px rgba(220, 245, 140, 0.06);
   border-radius: 2px;
   animation: scan-line 2.5s ease-in-out infinite;
 }
@@ -99,11 +89,4 @@ body {
   animation: screen-shake 0.25s ease-out;
 }
 
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.4s ease forwards;
-}
+/* fade-in removed */

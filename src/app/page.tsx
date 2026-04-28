@@ -30,6 +30,7 @@ const EXAMPLE_WALLETS = [
 export default function Home() {
   const [stage, setStage] = useState<Stage>("landing");
   const [wallet, setWallet] = useState("");
+  const [prefillWallet, setPrefillWallet] = useState("");
   const [cardData, setCardData] = useState<TraderCardData | null>(null);
   const [motivation, setMotivation] = useState("");
   const [error, setError] = useState("");
@@ -242,7 +243,7 @@ export default function Home() {
   /* ── Render ─────────────────────────────────────────────────────────────── */
 
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col overflow-hidden relative">
+    <div className="min-h-screen bg-white flex flex-col overflow-hidden relative">
       {/* Ambient particle field */}
       <ParticleField intensity={particleIntensity} />
 
@@ -251,7 +252,7 @@ export default function Home() {
         className="fixed inset-x-0 top-0 h-[300px] pointer-events-none z-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 100% at 50% 0%, rgba(220,245,140,0.03) 0%, transparent 70%)",
+            "radial-gradient(ellipse 80% 100% at 50% 0%, rgba(0,0,0,0.02) 0%, transparent 70%)",
         }}
       />
 
@@ -270,7 +271,7 @@ export default function Home() {
               className="absolute inset-0"
               style={{
                 background:
-                  "radial-gradient(ellipse 70% 60% at 50% 42%, rgba(220,245,140,0.6) 0%, rgba(220,245,140,0.2) 40%, transparent 70%)",
+                  "radial-gradient(ellipse 70% 60% at 50% 42%, rgba(195,255,0,0.6) 0%, rgba(195,255,0,0.2) 40%, transparent 70%)",
               }}
             />
           </motion.div>
@@ -278,7 +279,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* ── Header ── */}
-      <header className="relative z-20 flex items-center justify-between px-6 sm:px-10 py-5">
+      <header className="relative z-20 flex items-center justify-between px-6 sm:px-10 py-4">
         <a
           href="https://limitless.exchange"
           target="_blank"
@@ -287,19 +288,16 @@ export default function Home() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/limitless-logo.svg"
+            src="/limitless-full-logo.svg"
             alt="Limitless"
-            className="h-5 w-auto opacity-80 group-hover:opacity-100 transition-opacity"
+            className="h-8 sm:h-9 w-auto"
           />
-          <span className="text-[11px] font-medium tracking-[0.18em] uppercase text-[#52525B] group-hover:text-[#A1A1AA] transition-colors">
-            Limitless
-          </span>
         </a>
         <a
           href="https://limitless.exchange"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[11px] font-mono text-[#3F3F46] hover:text-[#52525B] transition-colors"
+          className="text-[11px] font-sans text-black/40 hover:text-black/60 transition-colors"
         >
           limitless.exchange
         </a>
@@ -307,7 +305,7 @@ export default function Home() {
 
       {/* Main content */}
       <main
-        className={`relative z-10 flex-1 flex flex-col items-center justify-center px-6 sm:px-10 ${
+        className={`relative z-10 flex-1 flex flex-col items-center justify-center px-6 sm:px-10 py-8 ${
           shaking ? "screen-shake" : ""
         }`}
       >
@@ -322,14 +320,14 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute bottom-full mb-8 left-0 right-0 text-center"
+                className="absolute bottom-full mb-6 left-0 right-0 text-center"
               >
-                <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-[#3F3F46] mb-3">
+                <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-black/40 mb-3">
                   Trader Identity
                 </p>
                 <h1
                   className="text-4xl sm:text-5xl font-bold leading-[1.1]"
-                  style={{ color: "#E4E4E7", letterSpacing: "-0.025em" }}
+                  style={{ color: "#000000", letterSpacing: "0.02em", fontFamily: "var(--font-nichrome), sans-serif" }}
                 >
                   What kind of trader are you?
                 </h1>
@@ -365,19 +363,19 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                  className="mt-8 w-full flex flex-col items-center"
+                  className="mt-6 w-full flex flex-col items-center"
                 >
-                  <WalletInput onSubmit={handleSubmit} loading={false} />
+                  <WalletInput onSubmit={handleSubmit} loading={false} prefill={prefillWallet} />
 
                   <div className="flex flex-wrap gap-3 justify-center mt-5">
-                    <span className="text-[11px] font-mono text-[#3F3F46]">
+                    <span className="text-[11px] font-sans text-black/30">
                       try:
                     </span>
                     {EXAMPLE_WALLETS.map((w) => (
                       <button
                         key={w}
-                        onClick={() => handleSubmit(w)}
-                        className="text-[11px] font-mono text-[#52525B] hover:text-[#A1A1AA] transition-colors duration-150"
+                        onClick={() => setPrefillWallet(w)}
+                        className="text-[11px] font-sans text-black/40 hover:text-black/70 transition-colors duration-150"
                       >
                         {w.slice(0, 8)}…
                       </button>
@@ -402,13 +400,13 @@ export default function Home() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="text-[13px] text-[#52525B] font-medium text-center"
+                      className="text-[13px] text-black/50 font-medium text-center"
                     >
                       {ANALYSIS_STEPS[stepIndex]}
                     </motion.p>
                   </AnimatePresence>
 
-                  <p className="text-[10px] font-mono text-[#27272A]">
+                  <p className="text-[10px] font-sans text-black/30">
                     {wallet.slice(0, 6)}…{wallet.slice(-4)}
                   </p>
                 </motion.div>
@@ -424,7 +422,7 @@ export default function Home() {
                   className="mt-6 flex flex-col items-center w-full max-w-2xl mx-auto"
                 >
               {/* Motivation quote */}
-              <p className="max-w-[540px] text-center text-sm text-[#52525B] italic leading-relaxed">
+              <p className="max-w-[540px] text-center text-sm text-black/50 italic leading-relaxed">
                 &ldquo;{motivation}&rdquo;
               </p>
 
@@ -435,9 +433,9 @@ export default function Home() {
                   onClick={handleShareX}
                   className="flex-1 flex items-center justify-center gap-2.5 px-6 py-4 text-[13px] font-bold tracking-[0.07em] uppercase transition-all duration-150 active:scale-[0.97]"
                   style={{
-                    background: "#DCF58C",
+                    background: "#c3ff00",
                     color: "#080808",
-                    borderRadius: "10px",
+                    borderRadius: "9999px",
                   }}
                 >
                   <svg
@@ -457,12 +455,12 @@ export default function Home() {
                   style={{
                     background: "transparent",
                     color:
-                      copyState === "done" ? "#22c55e" : "#52525B",
-                    borderRadius: "10px",
+                      copyState === "done" ? "#22c55e" : "#000000",
+                    borderRadius: "9999px",
                     border:
                       copyState === "done"
                         ? "1px solid rgba(34,197,94,0.25)"
-                        : "1px solid rgba(255,255,255,0.08)",
+                        : "1px solid rgba(0,0,0,0.15)",
                   }}
                 >
                   {copyState === "done" ? (
@@ -521,7 +519,7 @@ export default function Home() {
               {/* Reset */}
               <button
                 onClick={handleReset}
-                className="mt-5 text-[11px] font-mono tracking-widest text-[#3F3F46] hover:text-[#52525B] transition-colors uppercase"
+                className="mt-5 text-[11px] font-sans tracking-widest text-black/30 hover:text-black/60 transition-colors uppercase"
               >
                 ← analyse another wallet
               </button>
@@ -537,13 +535,13 @@ export default function Home() {
               exit={{ opacity: 0 }}
               className="mt-8 flex flex-col items-center gap-5 w-full max-w-lg mx-auto"
             >
-              <div className="w-full bg-red-500/[0.06] border border-red-500/15 rounded-xl px-5 py-4 text-sm text-red-400 text-center">
+              <div className="w-full bg-red-500/[0.06] border border-red-500/15 rounded-full px-5 py-4 text-sm text-red-400 text-center">
                 {error}
               </div>
               <WalletInput onSubmit={handleSubmit} loading={false} />
               <button
                 onClick={handleReset}
-                className="text-[11px] font-mono tracking-widest text-[#3F3F46] hover:text-[#52525B] transition-colors uppercase"
+                className="text-[11px] font-sans tracking-widest text-black/30 hover:text-black/60 transition-colors uppercase"
               >
                 ← back to start
               </button>
@@ -568,17 +566,17 @@ export default function Home() {
       )}
 
       {/* Footer */}
-      <footer className="relative z-10 px-6 sm:px-10 py-5">
-        <div className="flex items-center justify-between border-t border-white/[0.04] pt-5">
+      <footer className="relative z-10 px-6 sm:px-10 py-4">
+        <div className="flex items-center justify-between border-t border-black/[0.08] pt-4">
           <a
             href="https://limitless.exchange"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase text-[#27272A] hover:text-[#3F3F46] transition-colors"
+            className="flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase text-black/30 hover:text-black/50 transition-colors"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/limitless-logo.svg"
+              src="/limitless-full-logo.svg"
               alt=""
               className="h-3 w-auto opacity-30"
             />
@@ -589,16 +587,16 @@ export default function Home() {
               href="https://limitless.exchange"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[10px] tracking-[0.15em] uppercase text-[#27272A] hover:text-[#3F3F46] transition-colors"
+              className="text-[10px] tracking-[0.15em] uppercase text-black/30 hover:text-black/50 transition-colors"
             >
               Trade
             </a>
-            <span className="w-px h-2.5 bg-white/[0.06]" />
+            <span className="w-px h-2.5 bg-black/[0.1]" />
             <a
               href="https://x.com/trylimitless"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[10px] tracking-[0.15em] uppercase text-[#27272A] hover:text-[#3F3F46] transition-colors"
+              className="text-[10px] tracking-[0.15em] uppercase text-black/30 hover:text-black/50 transition-colors"
             >
               @trylimitless
             </a>

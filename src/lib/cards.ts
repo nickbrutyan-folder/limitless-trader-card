@@ -2,18 +2,18 @@ import type { CardConfig } from "./types";
 
 export const CARD_CONFIGS: CardConfig[] = [
   // Cluster 1 — Volume & Size
-  { id: "whale", title: "The Whale", accentColour: "#dcf68d", cluster: "volume", motivationTemplate: "You've moved {total_volume} through Limitless — that puts you in the top tier. When you enter a market, people notice. Size talks, and yours is loud." },
-  { id: "shrimp", title: "The Shrimp", accentColour: "#dcf68d", cluster: "volume", motivationTemplate: "With {trades} trades and a modest stack, you're proof that you don't need size to stay in the game. Every shrimp in the sea adds up." },
-  { id: "shark", title: "The Shark", accentColour: "#dcf68d", cluster: "volume", motivationTemplate: "A {win_rate}% win rate at meaningful size? You're not gambling — you're hunting. Methodical, profitable, and consistently dangerous." },
-  { id: "swarm", title: "The Swarm", accentColour: "#dcf68d", cluster: "volume", motivationTemplate: "You've fired off {trades} micro-bets and built real volume through sheer frequency. One bee is nothing — but a swarm moves markets." },
-  { id: "sniper", title: "The Sniper", accentColour: "#dcf68d", cluster: "volume", motivationTemplate: "You wait. You watch. Then you strike with 10x your usual size. Your best trade of +{best_trade} says it all — patience is your edge." },
-  { id: "arrival", title: "The Arrival", accentColour: "#dcf68d", cluster: "volume", motivationTemplate: "New to Limitless but already moving serious size. {total_volume} traded and you're just getting started. The platform hasn't seen you coming." },
-  { id: "size-queen", title: "The Size Queen", accentColour: "#dcf68d", cluster: "volume", motivationTemplate: "Every bet near max exposure, every time. You don't do half measures — it's full size or nothing. Bold and unapologetic." },
-  { id: "dripper", title: "The Dripper", accentColour: "#dcf68d", cluster: "volume", motivationTemplate: "Sub-$5 positions spread across dozens of markets. You're everywhere at once, dripping capital like a slow IV — covering every angle." },
+  { id: "whale", title: "The Whale", accentColour: "#c3ff00", cluster: "volume", motivationTemplate: "You've moved {total_volume} through Limitless — that puts you in the top tier. When you enter a market, people notice. Size talks, and yours is loud." },
+  { id: "shrimp", title: "The Shrimp", accentColour: "#c3ff00", cluster: "volume", motivationTemplate: "With {trades} trades and a modest stack, you're proof that you don't need size to stay in the game. Every shrimp in the sea adds up." },
+  { id: "shark", title: "The Shark", accentColour: "#c3ff00", cluster: "volume", motivationTemplate: "A {win_rate}% win rate at meaningful size? You're not gambling — you're hunting. Methodical, profitable, and consistently dangerous." },
+  { id: "swarm", title: "The Swarm", accentColour: "#c3ff00", cluster: "volume", motivationTemplate: "You've fired off {trades} micro-bets and built real volume through sheer frequency. One bee is nothing — but a swarm moves markets." },
+  { id: "sniper", title: "The Sniper", accentColour: "#c3ff00", cluster: "volume", motivationTemplate: "You wait. You watch. Then you strike with 10x your usual size. Your best trade of +{best_trade} says it all — patience is your edge." },
+  { id: "arrival", title: "The Arrival", accentColour: "#c3ff00", cluster: "volume", motivationTemplate: "New to Limitless but already moving serious size. {total_volume} traded and you're just getting started. The platform hasn't seen you coming." },
+  { id: "size-queen", title: "The Size Queen", accentColour: "#c3ff00", cluster: "volume", motivationTemplate: "Every bet near max exposure, every time. You don't do half measures — it's full size or nothing. Bold and unapologetic." },
+  { id: "dripper", title: "The Dripper", accentColour: "#c3ff00", cluster: "volume", motivationTemplate: "Sub-$5 positions spread across dozens of markets. You're everywhere at once, dripping capital like a slow IV — covering every angle." },
 
   // Cluster 2 — Win Rate & P&L Shape
   { id: "oracle", title: "The Oracle", accentColour: "#C6E040", cluster: "winrate", motivationTemplate: "Your {win_rate}% win rate puts you in rare company on Limitless. You don't chase — you wait for your spot, and you're right more often than not." },
-  { id: "rekt", title: "The Rekt", accentColour: "#dcf68d", cluster: "winrate", motivationTemplate: "Down {pnl} with a {win_rate}% hit rate — but you're still here. Most would've quit. The fact that you haven't says more than any P&L chart." },
+  { id: "rekt", title: "The Rekt", accentColour: "#c3ff00", cluster: "winrate", motivationTemplate: "Down {pnl} with a {win_rate}% hit rate — but you're still here. Most would've quit. The fact that you haven't says more than any P&L chart." },
   { id: "comeback-kid", title: "The Comeback Kid", accentColour: "#10B981", cluster: "winrate", motivationTemplate: "You dropped 40%+ and clawed it all back. That V-shaped recovery isn't luck — it's grit. Down bad to new highs. Respect." },
   { id: "one-hit-wonder", title: "The One-Hit Wonder", accentColour: "#F59E0B", cluster: "winrate", motivationTemplate: "One trade. +{best_trade}. That single call accounts for nearly all your lifetime P&L. Lightning struck once — will it strike again?" },
   { id: "slow-rug", title: "The Slow Rug", accentColour: "#6B7280", cluster: "winrate", motivationTemplate: "No blow-ups, no drama — just a slow, steady bleed. Your P&L has been gently sliding for a while. Sometimes the quietest losses are the hardest to spot." },
@@ -42,7 +42,7 @@ export const CARD_CONFIGS: CardConfig[] = [
   { id: "contrarian", title: "The Contrarian", accentColour: "#7C3AED", cluster: "category", motivationTemplate: "Low-volume, low-attention markets — that's where you live. While everyone crowds into the popular picks, you're quietly trading what they ignore." },
 
   // Cluster 5 — Position & Hold Behaviour
-  { id: "diamond-hands", title: "The Diamond Hands", accentColour: "#dcf68d", cluster: "position", motivationTemplate: "You hold to resolution. No early exits, no panic sells. Once you're in, you're in until the market decides. Conviction incarnate." },
+  { id: "diamond-hands", title: "The Diamond Hands", accentColour: "#c3ff00", cluster: "position", motivationTemplate: "You hold to resolution. No early exits, no panic sells. Once you're in, you're in until the market decides. Conviction incarnate." },
   { id: "locked-in", title: "The Locked In", accentColour: "#F97316", cluster: "position", motivationTemplate: "1-3 markets hold 80%+ of your exposure. High conviction, high stakes. You pick your spots and go all in. No hedging, no diversifying — just conviction." },
   { id: "diversifier", title: "The Diversifier", accentColour: "#06B6D4", cluster: "position", motivationTemplate: "No single market exceeds 5% of your book. Risk-managed, spread wide, textbook portfolio construction. You sleep well at night." },
   { id: "accumulator", title: "The Accumulator", accentColour: "#84CC16", cluster: "position", motivationTemplate: "You don't just enter once — you press your winners. The same markets keep appearing with bigger size. When you're right, you add more." },
@@ -53,7 +53,7 @@ export const CARD_CONFIGS: CardConfig[] = [
   { id: "safe-hands", title: "The Safe Hands", accentColour: "#22C55E", cluster: "probability", motivationTemplate: "70%+ probability entries across your book. Low variance, high conviction — you take what the market gives you and compound steadily." },
   { id: "coin-flip", title: "The Coin Flip", accentColour: "#A1A1AA", cluster: "probability", motivationTemplate: "45-55% odds, right in the sweet spot. You seek genuine uncertainty — the markets where nobody truly knows. That's where edge lives." },
   { id: "quant", title: "The Quant", accentColour: "#06B6D4", cluster: "probability", motivationTemplate: "Markets consistently move your way after entry. You're finding mispriced outcomes before the crowd corrects them. Systematic and sharp." },
-  { id: "degen", title: "The Degen", accentColour: "#dcf68d", cluster: "probability", motivationTemplate: "Sub-10% outcomes. Only miracles. Every position is a moonshot that makes the moonshot traders look conservative. Full degen, no apologies." },
+  { id: "degen", title: "The Degen", accentColour: "#c3ff00", cluster: "probability", motivationTemplate: "Sub-10% outcomes. Only miracles. Every position is a moonshot that makes the moonshot traders look conservative. Full degen, no apologies." },
   { id: "efficiency-trader", title: "The Efficiency Trader", accentColour: "#10B981", cluster: "probability", motivationTemplate: "Your bet sizing tracks probability like a formula. Kelly criterion energy — disciplined, calculated, and mathematically optimal." },
 
   // Cluster 7 — Ecosystem Engagement

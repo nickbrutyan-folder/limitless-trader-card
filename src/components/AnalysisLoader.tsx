@@ -70,7 +70,7 @@ export function AnalysisLoader({
     <div className="flex flex-col items-center justify-center min-h-[300px] w-full max-w-md mx-auto px-4">
 
       {/* Wallet label */}
-      <p className="text-[10px] font-mono tracking-[0.2em] text-[#27272A] uppercase mb-10">
+      <p className="text-[10px] font-sans tracking-[0.2em] text-black/30 uppercase mb-10">
         {short}
       </p>
 
@@ -83,7 +83,7 @@ export function AnalysisLoader({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="text-[13px] text-center text-[#52525B] font-medium"
+            className="text-[13px] text-center text-black/50 font-medium"
           >
             {STEPS[stepIndex]?.text}
           </motion.p>
@@ -92,16 +92,16 @@ export function AnalysisLoader({
 
       {/* Progress bar */}
       <div className="w-full max-w-[280px] mb-3">
-        <div className="w-full h-[2px] bg-white/[0.04] rounded-full overflow-hidden">
+        <div className="w-full h-[2px] bg-black/[0.06] rounded-full overflow-hidden">
           <motion.div
-            className="h-full rounded-full bg-[#dcf68d]"
+            className="h-full rounded-full bg-[#c3ff00]"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           />
         </div>
       </div>
 
-      <span className="text-[10px] font-mono text-[#27272A] tabular-nums">{progress}%</span>
+      <span className="text-[10px] font-sans text-black/30 tabular-nums">{progress}%</span>
     </div>
   );
 }

@@ -204,7 +204,7 @@ export function CardScene({
                   : { duration: 0.6 }
               }
               className="absolute inset-0 -z-10 blur-3xl rounded-full"
-              style={{ background: "#DCF58C" }}
+              style={{ background: "#c3ff00" }}
             />
           )}
         </AnimatePresence>

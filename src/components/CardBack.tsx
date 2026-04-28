@@ -5,9 +5,8 @@ export function CardBack() {
     <div
       className="w-full h-full rounded-[20px] overflow-hidden relative"
       style={{
-        background:
-          "linear-gradient(145deg, #111111 0%, #0a0a0a 40%, #060606 100%)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "#052F1B",
+        border: "1px solid rgba(195,255,0,0.08)",
       }}
     >
       {/* Holographic shimmer sweep */}
@@ -28,32 +27,32 @@ export function CardBack() {
       />
 
       {/* Inner border frame */}
-      <div className="absolute inset-5 sm:inset-7 rounded-[12px] border border-white/[0.04]" />
+      <div className="absolute inset-5 sm:inset-7 rounded-[12px] border border-[#C3FF00]/[0.06]" />
 
       {/* Centre logo + label */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[12px] overflow-hidden bg-black/40 flex items-center justify-center border border-white/[0.06]">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-[16px] overflow-hidden flex items-center justify-center" style={{ background: "#C3FF00" }}>
           <img
-            src="/limitless-logo.svg"
+            src="/limitless-icon-on-green.svg"
             alt="Limitless"
-            className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
+            className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
           />
         </div>
-        <span className="text-[9px] sm:text-[10px] font-medium tracking-[0.3em] text-[#27272A] uppercase">
-          Trader Card
+        <span className="text-[9px] sm:text-[10px] font-medium tracking-[0.3em] text-[#C3FF00]/30 uppercase">
+          Reveal Card
         </span>
       </div>
 
       {/* Corner filigree — top-left */}
       <div className="absolute top-4 left-4">
-        <div className="w-4 h-[1px] bg-white/[0.06]" />
-        <div className="w-[1px] h-4 bg-white/[0.06]" />
+        <div className="w-4 h-[1px] bg-[#C3FF00]/[0.08]" />
+        <div className="w-[1px] h-4 bg-[#C3FF00]/[0.08]" />
       </div>
 
       {/* Corner filigree — bottom-right */}
       <div className="absolute bottom-4 right-4 flex flex-col items-end">
-        <div className="w-[1px] h-4 bg-white/[0.06] self-end" />
-        <div className="w-4 h-[1px] bg-white/[0.06]" />
+        <div className="w-[1px] h-4 bg-[#C3FF00]/[0.08] self-end" />
+        <div className="w-4 h-[1px] bg-[#C3FF00]/[0.08]" />
       </div>
     </div>
   );
