@@ -17,7 +17,7 @@ import type {
   MarketInfo,
   ClobPosition,
 } from "./limitless-api";
-import { rawToUsdc } from "./limitless-api";
+import { rawToUsdc, safeNum } from "./limitless-api";
 
 export interface DerivedData {
   totalVolumeUsdc: number;
@@ -112,7 +112,7 @@ export function deriveData(
 
   // ── Volume ────────────────────────────────────────────────────────────────
   // API returns: {"data":"1043579"} — whole USDC (not 6-decimal)
-  const totalVolumeUsdc = Number(tradedVolume.data ?? "0");
+  const totalVolumeUsdc = Math.max(0, safeNum(tradedVolume.data));
 
   // ── Positions ──────────────────────────────────────────────────────────────
   const clobPositions = Array.isArray(positions.clob) ? positions.clob : [];
@@ -166,7 +166,7 @@ export function deriveData(
     if (yp + np > bestDayUsdc) bestDayUsdc = yp + np;
   }
   for (const pos of ammPositions) {
-    const pnl = Number(pos.realizedPnl ?? 0);
+    const pnl = safeNum(pos.realizedPnl);
     if (pnl > bestDayUsdc) bestDayUsdc = pnl;
   }
   const worstDayUsdc = dailyDeltas.length > 0 ? Math.min(...dailyDeltas, 0) : 0;
@@ -185,7 +185,7 @@ export function deriveData(
     }
     for (const pos of ammPositions) {
       netPnlUsdc +=
-        Number(pos.realizedPnl ?? 0) + Number(pos.unrealizedPnl ?? 0);
+        safeNum(pos.realizedPnl) + safeNum(pos.unrealizedPnl);
     }
   }
 
@@ -241,7 +241,7 @@ export function deriveData(
     }
   }
   for (const pos of ammPositions) {
-    const pnl = Number(pos.realizedPnl ?? 0);
+    const pnl = safeNum(pos.realizedPnl);
     if (pnl !== 0) {
       rpnlClosed++;
       if (pnl > 0) rpnlWins++;

@@ -186,7 +186,13 @@ export async function fetchMarketDetails(
   return marketMap;
 }
 
-/** Convert raw USDC string (6 decimals) to a float */
+/** Coerce any value to a finite number; returns `fallback` for NaN / Infinity / nullish. */
+export function safeNum(v: unknown, fallback = 0): number {
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/** Convert raw USDC string (6 decimals) to a float; never returns NaN. */
 export function rawToUsdc(raw: string | number, decimals = 6): number {
-  return Number(raw) / Math.pow(10, decimals);
+  return safeNum(raw) / Math.pow(10, decimals);
 }

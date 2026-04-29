@@ -35,9 +35,9 @@ export default function Home() {
   const [motivation, setMotivation] = useState("");
   const [error, setError] = useState("");
   const [stepIndex, setStepIndex] = useState(0);
-  const [copyState, setCopyState] = useState<"idle" | "copying" | "done">(
-    "idle"
-  );
+  const [copyState, setCopyState] = useState<
+    "idle" | "copying" | "done" | "downloaded" | "needs-https"
+  >("idle");
 
   // Card scene state
   const [showFlash, setShowFlash] = useState(false);
@@ -209,23 +209,42 @@ export default function Home() {
         setCopyState("idle");
         return;
       }
-      try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ "image/png": blob }),
-        ]);
-        setCopyState("done");
-        setTimeout(() => setCopyState("idle"), 2000);
-      } catch {
-        // Clipboard API unavailable (older browsers / non-secure context):
-        // fall back to download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `limitless-${cardData.card.id}.png`;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        setCopyState("done");
-        setTimeout(() => setCopyState("idle"), 2000);
+      // Clipboard API requires a secure context (HTTPS). On HTTP we surface a
+      // clear "needs HTTPS" hint instead of silently downloading.
+      const secure =
+        typeof window !== "undefined" && window.isSecureContext;
+      const hasClipboardWrite =
+        typeof navigator !== "undefined" &&
+        typeof navigator.clipboard?.write === "function" &&
+        typeof ClipboardItem !== "undefined";
+
+      if (secure && hasClipboardWrite) {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ]);
+          setCopyState("done");
+          setTimeout(() => setCopyState("idle"), 2000);
+          return;
+        } catch {
+          /* fall through to download */
+        }
+      } else if (!secure) {
+        // Show a hint, then still download as a fallback so the user gets the
+        // file. They can then upload manually wherever they need.
+        setCopyState("needs-https");
+        setTimeout(() => setCopyState("idle"), 4000);
+      }
+      // Download fallback
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `limitless-${cardData.card.id}.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      if (secure) {
+        setCopyState("downloaded");
+        setTimeout(() => setCopyState("idle"), 2500);
       }
     } catch {
       setCopyState("idle");
@@ -493,13 +512,24 @@ export default function Home() {
                   style={{
                     background: "transparent",
                     color:
-                      copyState === "done" ? "#22c55e" : "#000000",
+                      copyState === "done"
+                        ? "#22c55e"
+                        : copyState === "needs-https"
+                        ? "#f59e0b"
+                        : "#000000",
                     borderRadius: "9999px",
                     border:
                       copyState === "done"
                         ? "1px solid rgba(34,197,94,0.25)"
+                        : copyState === "needs-https"
+                        ? "1px solid rgba(245,158,11,0.35)"
                         : "1px solid rgba(0,0,0,0.15)",
                   }}
+                  title={
+                    copyState === "needs-https"
+                      ? "Browser blocks clipboard copy on plain http://. Image was downloaded instead — switch to https:// to copy directly."
+                      : undefined
+                  }
                 >
                   {copyState === "done" ? (
                     <>
@@ -513,6 +543,32 @@ export default function Home() {
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                       Copied
+                    </>
+                  ) : copyState === "downloaded" ? (
+                    <>
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="w-3.5 h-3.5 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Downloaded
+                    </>
+                  ) : copyState === "needs-https" ? (
+                    <>
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="w-3.5 h-3.5 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      </svg>
+                      Use HTTPS to copy
                     </>
                   ) : copyState === "copying" ? (
                     <>

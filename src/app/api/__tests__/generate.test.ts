@@ -53,11 +53,12 @@ function interpolateMotivation(
   template: string,
   stats: { winRate: number; pnl: number; volume: number; bestDay: number },
   totalVolume: number,
+  tradeCount: number,
 ): string {
   return template
     .replace("{win_rate}", stats.winRate === -1 ? "strong" : String(Math.round(stats.winRate)))
     .replace("{pnl}", `$${Math.abs(stats.pnl).toLocaleString()}`)
-    .replace("{trades}", `$${Math.round(totalVolume).toLocaleString()}`)
+    .replace("{trades}", Math.round(tradeCount).toLocaleString())
     .replace("{best_trade}", `$${stats.bestDay.toLocaleString()}`)
     .replace("{total_volume}", `$${Math.round(totalVolume).toLocaleString()}`);
 }
@@ -66,7 +67,7 @@ describe("interpolateMotivation", () => {
   const stats = { winRate: 68, pnl: 5000, volume: 50000, bestDay: 1200 };
 
   it("replaces {win_rate} with numeric value", () => {
-    const result = interpolateMotivation("Rate: {win_rate}%", stats, 50000);
+    const result = interpolateMotivation("Rate: {win_rate}%", stats, 50000, 200);
     expect(result).toBe("Rate: 68%");
   });
 
@@ -75,38 +76,40 @@ describe("interpolateMotivation", () => {
       "Your {win_rate} performance",
       { ...stats, winRate: -1 },
       50000,
+      200,
     );
     expect(result).toBe("Your strong performance");
   });
 
   it("replaces {pnl} with absolute value", () => {
-    const result = interpolateMotivation("Down {pnl}", { ...stats, pnl: -3000 }, 50000);
+    const result = interpolateMotivation("Down {pnl}", { ...stats, pnl: -3000 }, 50000, 200);
     expect(result).toContain("$3,000");
   });
 
   it("replaces {best_trade}", () => {
-    const result = interpolateMotivation("Best: +{best_trade}", stats, 50000);
+    const result = interpolateMotivation("Best: +{best_trade}", stats, 50000, 200);
     expect(result).toContain("$1,200");
   });
 
   it("replaces {total_volume}", () => {
-    const result = interpolateMotivation("Volume: {total_volume}", stats, 100000);
+    const result = interpolateMotivation("Volume: {total_volume}", stats, 100000, 200);
     expect(result).toContain("$100,000");
   });
 
-  it("replaces {trades} with formatted volume", () => {
-    const result = interpolateMotivation("{trades} traded", stats, 75000);
-    expect(result).toContain("$75,000");
+  it("replaces {trades} with formatted trade count, not dollars", () => {
+    const result = interpolateMotivation("{trades} trades", stats, 75000, 250);
+    expect(result).toBe("250 trades");
+    expect(result).not.toContain("$");
   });
 
   it("handles template with no placeholders", () => {
-    const result = interpolateMotivation("No placeholders here.", stats, 50000);
+    const result = interpolateMotivation("No placeholders here.", stats, 50000, 200);
     expect(result).toBe("No placeholders here.");
   });
 
   it("handles template with all placeholders at once", () => {
     const template = "{win_rate} {pnl} {trades} {best_trade} {total_volume}";
-    const result = interpolateMotivation(template, stats, 50000);
+    const result = interpolateMotivation(template, stats, 50000, 200);
     expect(result).not.toContain("{");
   });
 });
@@ -117,8 +120,14 @@ describe("interpolateMotivation", () => {
 vi.mock("@/lib/limitless-api", () => ({
   fetchPortfolioData: vi.fn(),
   fetchMarketDetails: vi.fn(),
-  rawToUsdc: (raw: string | number, decimals = 6) =>
-    Number(raw) / Math.pow(10, decimals),
+  rawToUsdc: (raw: string | number, decimals = 6) => {
+    const n = Number(raw);
+    return Number.isFinite(n) ? n / Math.pow(10, decimals) : 0;
+  },
+  safeNum: (v: unknown, fallback = 0) => {
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) ? n : fallback;
+  },
 }));
 
 import { GET } from "../../../app/api/generate/route";

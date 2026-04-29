@@ -14,12 +14,24 @@ function isValidAddress(addr: string): boolean {
 function interpolateMotivation(
   template: string,
   stats: TraderStats,
-  totalVolume: number
+  totalVolume: number,
+  tradeCount: number
 ): string {
-  return template
-    .replace("{win_rate}", stats.winRate === -1 ? "strong" : String(Math.round(stats.winRate)))
+  // {trades} renders as a count (e.g. "200 trades"); {total_volume} renders as
+  // dollars (e.g. "$50,000 traded"). Earlier the two were conflated and the
+  // shrimp/swarm/mid-curve/grinder copy read "$X trades" — visible nonsense.
+  // When win rate is unknown, replace `{win_rate}%` (with the `%`) so templates
+  // like "with a {win_rate}% hit rate" don't render as "with a strong% hit rate".
+  const unknownWinRate = stats.winRate === -1;
+  let out = template;
+  if (unknownWinRate) {
+    out = out.replace(/\{win_rate\}%/g, "strong").replace(/\{win_rate\}/g, "strong");
+  } else {
+    out = out.replace(/\{win_rate\}/g, String(Math.round(stats.winRate)));
+  }
+  return out
     .replace("{pnl}", `$${Math.abs(stats.pnl).toLocaleString()}`)
-    .replace("{trades}", `$${Math.round(totalVolume).toLocaleString()}`)
+    .replace("{trades}", Math.round(tradeCount).toLocaleString())
     .replace("{best_trade}", `$${stats.bestDay.toLocaleString()}`)
     .replace("{total_volume}", `$${Math.round(totalVolume).toLocaleString()}`);
 }
@@ -63,7 +75,8 @@ export async function GET(req: NextRequest) {
     const motivation = interpolateMotivation(
       card.motivationTemplate,
       stats,
-      derived.totalVolumeUsdc
+      derived.totalVolumeUsdc,
+      derived.tradeCount
     );
 
     const cardData: TraderCardData = {
