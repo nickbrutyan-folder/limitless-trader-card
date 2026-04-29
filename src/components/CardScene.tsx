@@ -96,7 +96,7 @@ export function CardScene({
           {/* Aspect-ratio container */}
           <div
             className="relative w-full"
-            style={{ aspectRatio: "1.65 / 1" }}
+            style={{ aspectRatio: "16 / 9" }}
           >
             {/* Card faces — smooth reveal with scale + fade */}
             <AnimatePresence mode="wait">

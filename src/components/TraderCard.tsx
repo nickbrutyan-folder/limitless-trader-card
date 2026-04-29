@@ -2,142 +2,196 @@
 
 import type { TraderCardData } from "@/lib/types";
 
-function formatUSD(value: number): string {
+const ACCENT = "#C3FF00";
+
+function formatUSD(value: number, opts: { showSign?: boolean } = {}): string {
   const abs = Math.abs(value);
-  if (abs >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1_000) return `$${(value / 1_000).toFixed(value % 1000 === 0 ? 0 : 1)}K`.replace(".0K", "K");
-  return `$${value.toLocaleString()}`;
+  const sign = value < 0 ? "-" : opts.showSign && value > 0 ? "+" : "";
+  let body: string;
+  if (abs >= 1_000_000) body = `${(abs / 1_000_000).toFixed(1)}M`.replace(".0M", "M");
+  else if (abs >= 1_000) body = `${(abs / 1_000).toFixed(1)}K`.replace(".0K", "K");
+  else body = `${Math.round(abs)}`;
+  return `${sign}$${body}`;
 }
 
 export function TraderCard({ data }: { data: TraderCardData }) {
-  const { card, stats, xHandle, xProfilePic } = data;
-  const accent = "#c3ff00";
+  const { card, stats } = data;
+  const winRateText = stats.winRate === -1 ? "—" : `${stats.winRate}%`;
+
+  // Scale title font to fit. "The OG" (6 chars) caps at 15.6cqw (300px / 1920px,
+  // matching the Figma). Longer titles shrink so they fit on 1–2 lines without
+  // colliding with the stats row below.
+  const titleLen = Math.max(card.title.length, 1);
+  const titleSize = `${Math.max(7, Math.min(15.6, 95 / titleLen))}cqw`;
 
   return (
     <div
-      className="relative w-full max-w-[540px] sm:max-w-[620px] mx-auto rounded-[20px] overflow-hidden"
+      className="relative w-full h-full overflow-hidden rounded-[20px] select-none"
       style={{
-        aspectRatio: "1.65 / 1",
-        background: "linear-gradient(145deg, #111111 0%, #0a0a0a 40%, #060606 100%)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        aspectRatio: "16 / 9",
+        background: ACCENT,
+        containerType: "inline-size",
+        fontFamily: "var(--font-inter), Inter, system-ui, sans-serif",
+        color: "#000",
       }}
     >
-      {/* Top accent line */}
-      <div
-        className="absolute top-0 left-[10%] right-[10%] h-[1px]"
-        style={{ background: `linear-gradient(90deg, transparent, ${accent}40, transparent)` }}
-      />
-
-      {/* Noise grain */}
-      <div
-        className="absolute inset-0 opacity-[0.025] pointer-events-none"
+      {/* Top-left big decorative brand mark — extends above the card */}
+      <img
+        src="/limitless-icon-on-green.svg"
+        alt=""
+        aria-hidden="true"
+        className="absolute pointer-events-none select-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          width: "21%",
+          top: "-12%",
+          left: "1.5%",
         }}
       />
 
-      {/* Corner accent — subtle diagonal */}
-      <div
-        className="absolute top-0 right-0 w-[120px] h-[120px] pointer-events-none"
+      {/* Bottom-right huge decorative brand mark — clipped at edges */}
+      <img
+        src="/limitless-icon-on-green.svg"
+        alt=""
+        aria-hidden="true"
+        className="absolute pointer-events-none select-none"
         style={{
-          background: `linear-gradient(225deg, ${accent}08 0%, transparent 60%)`,
+          width: "55%",
+          right: "-9%",
+          bottom: "-22%",
         }}
       />
 
-      {/* Content */}
-      <div className="absolute inset-0 p-7 sm:p-9 flex flex-col justify-between z-10">
+      {/* Top-right: "Trader Card" label + small icon */}
+      <div
+        className="absolute flex items-center"
+        style={{
+          right: "2.6%",
+          top: "4.6%",
+          gap: "1.5cqw",
+        }}
+      >
+        <span
+          className="font-medium whitespace-nowrap"
+          style={{
+            fontSize: "2.45cqw",
+            letterSpacing: "-0.05em",
+            lineHeight: 1,
+          }}
+        >
+          Trader Card
+        </span>
+        <span
+          className="flex items-center justify-center bg-black"
+          style={{
+            width: "5.2cqw",
+            height: "5.2cqw",
+            borderRadius: "0.8cqw",
+          }}
+        >
+          <img
+            src="/limitless-icon-green.svg"
+            alt="Limitless"
+            style={{ width: "70%", height: "70%" }}
+          />
+        </span>
+      </div>
 
-        {/* Top Row */}
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-2.5">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-[5px] overflow-hidden bg-black/60 flex items-center justify-center border border-white/[0.06]">
-              <img
-                src="/limitless-logo.svg"
-                alt="Limitless"
-                className="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain"
-              />
-            </div>
-            <span className="text-[8px] sm:text-[9px] font-medium tracking-[0.25em] text-[#3F3F46] uppercase">
-              Trader Card
-            </span>
-          </div>
+      {/* Archetype title — font shrinks for longer titles to avoid stat-row collision */}
+      <h1
+        className="absolute font-bold"
+        style={{
+          left: "2.6%",
+          top: "23%",
+          width: "72%",
+          fontSize: titleSize,
+          letterSpacing: "-0.05em",
+          lineHeight: 0.95,
+          margin: 0,
+        }}
+      >
+        {card.title}
+      </h1>
 
-          {xHandle && xProfilePic && (
-            <div className="flex items-center gap-2.5">
-              <span className="text-[11px] font-medium text-[#52525B]">
-                @{xHandle}
-              </span>
-              <div
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full p-[1.5px]"
-                style={{ background: `linear-gradient(135deg, ${accent}90, ${accent}30)` }}
-              >
-                <div className="w-full h-full rounded-full overflow-hidden">
-                  <img src={xProfilePic} alt="" className="w-full h-full object-cover" />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      {/* Stats row */}
+      <div
+        className="absolute flex items-end"
+        style={{
+          left: "2.6%",
+          top: "59%",
+          gap: "4cqw",
+        }}
+      >
+        <Stat label="Win Rate" value={winRateText} />
+        <Stat label="P&L" value={formatUSD(stats.pnl)} />
+        <Stat label="Volume" value={formatUSD(stats.volume)} />
+      </div>
 
-        {/* Center — Title */}
-        <div className="flex flex-col gap-6 sm:gap-7">
-          <div>
-            <h1
-              className="text-[32px] sm:text-[40px] font-extrabold tracking-[-0.03em] leading-none text-[#E4E4E7]"
-            >
-              {card.title}
-            </h1>
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-end gap-7 sm:gap-9">
-            <Stat label="Win Rate" value={stats.winRate === -1 ? "—" : `${stats.winRate}%`} accent={accent} />
-            <Stat label="P&L" value={formatUSD(stats.pnl)} accent={accent} />
-            <Stat label="Volume" value={formatUSD(stats.volume)} accent={accent} />
-          </div>
-        </div>
-
-        {/* Bottom Row */}
-        <div className="flex justify-between items-end">
-          <div className="flex items-baseline gap-2">
-            <span className="text-[9px] sm:text-[10px] font-medium text-[#3F3F46] uppercase tracking-wider">
-              Best Day
-            </span>
-            <span
-              className="text-sm sm:text-[15px] font-bold tabular-nums"
-              style={{ color: accent }}
-            >
-              +{formatUSD(stats.bestDay)}
-            </span>
-          </div>
-
-          <span className="text-[8px] font-medium tracking-[0.25em] uppercase text-[#27272A]">
-            limitless.exchange
+      {/* Best Day — black pill + label */}
+      <div
+        className="absolute flex items-center"
+        style={{
+          left: "2.6%",
+          bottom: "5.5%",
+          gap: "1.6cqw",
+        }}
+      >
+        <span
+          className="flex items-center bg-black"
+          style={{
+            paddingLeft: "1.3cqw",
+            paddingRight: "1.3cqw",
+            paddingTop: "0.6cqw",
+            paddingBottom: "0.6cqw",
+            color: ACCENT,
+          }}
+        >
+          <span
+            className="font-bold tabular-nums"
+            style={{
+              fontSize: "2.6cqw",
+              letterSpacing: "-0.05em",
+              lineHeight: 1,
+            }}
+          >
+            {formatUSD(stats.bestDay, { showSign: true })}
           </span>
-        </div>
+        </span>
+        <span
+          className="font-medium"
+          style={{
+            fontSize: "1.875cqw",
+            letterSpacing: "-0.05em",
+            lineHeight: 1,
+          }}
+        >
+          Best Day
+        </span>
       </div>
     </div>
   );
 }
 
-function Stat({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: string;
-  accent?: string;
-}) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" style={{ gap: "0.5cqw" }}>
       <span
-        className="text-[22px] sm:text-[28px] font-bold tracking-[-0.02em] leading-none tabular-nums"
-        style={{ color: accent ?? "#E4E4E7" }}
+        className="font-bold tabular-nums whitespace-nowrap"
+        style={{
+          fontSize: "5.2cqw",
+          letterSpacing: "-0.05em",
+          lineHeight: 1,
+        }}
       >
         {value}
       </span>
-      <span className="text-[8px] sm:text-[9px] font-medium uppercase tracking-[0.2em] text-[#3F3F46] mt-1.5">
+      <span
+        className="font-medium"
+        style={{
+          fontSize: "1.82cqw",
+          letterSpacing: "-0.05em",
+          lineHeight: 1,
+        }}
+      >
         {label}
       </span>
     </div>

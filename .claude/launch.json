@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "next-dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "./.claude/start-dev.sh",
+      "runtimeArgs": [],
       "port": 8081
     }
   ]

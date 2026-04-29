@@ -16,7 +16,5 @@ export interface TraderStats {
 export interface TraderCardData {
   card: CardConfig;
   stats: TraderStats;
-  xHandle?: string;
-  xProfilePic?: string;
   walletAddress: string;
 }

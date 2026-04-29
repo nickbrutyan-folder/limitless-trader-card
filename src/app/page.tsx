@@ -567,7 +567,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="relative z-10 px-6 sm:px-10 py-4">
-        <div className="flex items-center justify-between border-t border-black/[0.08] pt-4">
+        <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 sm:gap-0 border-t border-black/[0.08] pt-4">
           <a
             href="https://limitless.exchange"
             target="_blank"
