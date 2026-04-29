@@ -27,7 +27,7 @@ export interface DerivedData {
   winRate: number;             // 0–1, or -1 if unknown
   winRateSource: "realisedPnl" | "resolved" | "dailyPnl" | "none";
   pnlCurve: number[];
-  bestDayUsdc: number;         // largest single-day gain
+  bestDayUsdc: number;         // largest realized gain (daily delta or single trade)
   worstDayUsdc: number;        // largest single-day loss
   pnlTrend: "up" | "down" | "flat" | "volatile" | "v-shape" | "exponential";
   openPositionCount: number;
@@ -138,7 +138,22 @@ export function deriveData(
     dailyDeltas.push(pnlCurve[i] - pnlCurve[i - 1]);
   }
 
-  const bestDayUsdc = dailyDeltas.length > 0 ? Math.max(...dailyDeltas, 0) : 0;
+  // Best Day = largest realized gain we can find, drawing from three sources:
+  // (1) daily P&L chart deltas (preferred when the chart has enough datapoints)
+  // (2) max single CLOB position realisedPnl
+  // (3) max single AMM position realizedPnl
+  // For AMM-heavy wallets (Hourly Crypto, Commodities) the daily chart often
+  // has only 1-2 points, so single-trade max becomes the meaningful signal.
+  let bestDayUsdc = dailyDeltas.length > 0 ? Math.max(...dailyDeltas, 0) : 0;
+  for (const pos of clobPositions) {
+    const yp = rawToUsdc(pos.positions?.yes?.realisedPnl ?? "0");
+    const np = rawToUsdc(pos.positions?.no?.realisedPnl ?? "0");
+    if (yp + np > bestDayUsdc) bestDayUsdc = yp + np;
+  }
+  for (const pos of ammPositions) {
+    const pnl = Number(pos.realizedPnl ?? 0);
+    if (pnl > bestDayUsdc) bestDayUsdc = pnl;
+  }
   const worstDayUsdc = dailyDeltas.length > 0 ? Math.min(...dailyDeltas, 0) : 0;
   const netPnlUsdc =
     pnlCurve.length > 0 ? pnlCurve[pnlCurve.length - 1] : 0;
