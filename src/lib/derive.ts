@@ -129,10 +129,21 @@ export function deriveData(
   }
 
   // ── P&L ───────────────────────────────────────────────────────────────────
-  const pnlData = Array.isArray(pnlChart.data) ? pnlChart.data : [];
-  const pnlCurve = pnlData.map((p) => p.value ?? 0);
+  // The Limitless /pnl-chart endpoint returns trustworthy values for wallets
+  // with rich trading history (e.g. 100+ datapoints), but ships garbage for
+  // wallets with sparse history (typically 1–2 chart points): values exceeding
+  // the wallet's total traded volume by 3–6×, which is physically impossible.
+  // Gate the chart at the source: if any value exceeds total volume, the
+  // entire series is treated as missing and downstream metrics fall back to
+  // position-derived signals (single-trade realized PnL, etc.).
+  const rawPnlData = Array.isArray(pnlChart.data) ? pnlChart.data : [];
+  const rawCurve = rawPnlData.map((p) => p.value ?? 0);
+  const chartIsSane =
+    rawCurve.length > 0 &&
+    rawCurve.every((v) => Math.abs(v) <= totalVolumeUsdc);
+  const pnlCurve = chartIsSane ? rawCurve : [];
 
-  // Daily deltas (these are day-over-day PnL changes, NOT per-trade)
+  // Daily deltas (day-over-day PnL changes; empty when the chart is unusable)
   const dailyDeltas: number[] = [];
   for (let i = 1; i < pnlCurve.length; i++) {
     dailyDeltas.push(pnlCurve[i] - pnlCurve[i - 1]);
@@ -155,8 +166,24 @@ export function deriveData(
     if (pnl > bestDayUsdc) bestDayUsdc = pnl;
   }
   const worstDayUsdc = dailyDeltas.length > 0 ? Math.min(...dailyDeltas, 0) : 0;
-  const netPnlUsdc =
-    pnlCurve.length > 0 ? pnlCurve[pnlCurve.length - 1] : 0;
+
+  // Net P&L: use chart's last value when sane, else sum realized + unrealized
+  // across active positions (CLOB + AMM).
+  let netPnlUsdc = 0;
+  if (pnlCurve.length > 0) {
+    netPnlUsdc = pnlCurve[pnlCurve.length - 1];
+  } else {
+    for (const pos of clobPositions) {
+      netPnlUsdc += rawToUsdc(pos.positions?.yes?.realisedPnl ?? "0");
+      netPnlUsdc += rawToUsdc(pos.positions?.yes?.unrealizedPnl ?? "0");
+      netPnlUsdc += rawToUsdc(pos.positions?.no?.realisedPnl ?? "0");
+      netPnlUsdc += rawToUsdc(pos.positions?.no?.unrealizedPnl ?? "0");
+    }
+    for (const pos of ammPositions) {
+      netPnlUsdc +=
+        Number(pos.realizedPnl ?? 0) + Number(pos.unrealizedPnl ?? 0);
+    }
+  }
 
   // Active trading days (days with > $10 PnL movement)
   const activeDays = dailyDeltas.filter((d) => Math.abs(d) > 10).length;
