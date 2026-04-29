@@ -138,8 +138,12 @@ export function deriveData(
   // position-derived signals (single-trade realized PnL, etc.).
   const rawPnlData = Array.isArray(pnlChart.data) ? pnlChart.data : [];
   const rawCurve = rawPnlData.map((p) => p.value ?? 0);
+  // Trust the chart only when (1) it has enough datapoints to represent real
+  // history (>= 3 points; sparse 1-2 point responses have been observed to
+  // ship garbage values, e.g. a $2.2M-volume wallet with a chart claiming
+  // -$14M P&L), and (2) every point is within physical bounds.
   const chartIsSane =
-    rawCurve.length > 0 &&
+    rawCurve.length >= 3 &&
     rawCurve.every((v) => Math.abs(v) <= totalVolumeUsdc);
   const pnlCurve = chartIsSane ? rawCurve : [];
 

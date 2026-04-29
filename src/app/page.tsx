@@ -45,7 +45,6 @@ export default function Home() {
   const [isCharging, setIsCharging] = useState(false);
   const [shaking, setShaking] = useState(false);
 
-  const cardRef = useRef<HTMLDivElement>(null);
   const apiPromiseRef =
     useRef<Promise<{ cardData: TraderCardData; motivation: string }> | null>(
       null
@@ -189,50 +188,89 @@ export default function Home() {
 
   /* ── Copy / Share ───────────────────────────────────────────────────────── */
 
+  // Server-rendered card image — pixel-perfect, deterministic. Replaces the
+  // earlier html2canvas approach which failed on container queries.
+  const fetchCardImage = useCallback(async (): Promise<Blob | null> => {
+    if (!cardData) return null;
+    const res = await fetch(
+      `/api/card-image?wallet=${encodeURIComponent(cardData.walletAddress)}`,
+      { cache: "force-cache" }
+    );
+    if (!res.ok) return null;
+    return res.blob();
+  }, [cardData]);
+
   const handleCopyImage = useCallback(async () => {
-    if (!cardRef.current || copyState === "copying") return;
+    if (!cardData || copyState === "copying") return;
     setCopyState("copying");
     try {
-      const { default: html2canvas } = await import("html2canvas");
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: null,
-        scale: 2,
-        useCORS: true,
-      });
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          setCopyState("idle");
+      const blob = await fetchCardImage();
+      if (!blob) {
+        setCopyState("idle");
+        return;
+      }
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob }),
+        ]);
+        setCopyState("done");
+        setTimeout(() => setCopyState("idle"), 2000);
+      } catch {
+        // Clipboard API unavailable (older browsers / non-secure context):
+        // fall back to download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `limitless-${cardData.card.id}.png`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        setCopyState("done");
+        setTimeout(() => setCopyState("idle"), 2000);
+      }
+    } catch {
+      setCopyState("idle");
+    }
+  }, [cardData, copyState, fetchCardImage]);
+
+  const handleShareX = useCallback(async () => {
+    if (!cardData) return;
+    const text = `I'm "${cardData.card.title}" on @trylimitless\n\n"${motivation}"\n\nDiscover your trader archetype 👇\nlimitless.exchange/card`;
+    const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
+
+    // Try Web Share API on mobile — attaches the image directly to the share
+    // sheet. Falls through to clipboard + Twitter intent on desktop.
+    try {
+      const blob = await fetchCardImage();
+      if (blob && typeof navigator.share === "function") {
+        const file = new File([blob], "trader-card.png", {
+          type: "image/png",
+        });
+        const data = { files: [file], text } as ShareData;
+        if (
+          typeof navigator.canShare === "function" &&
+          navigator.canShare(data)
+        ) {
+          await navigator.share(data);
           return;
         }
+      }
+      // Desktop / no native share: copy image to clipboard so the user can
+      // paste it into Twitter, then open the compose window
+      if (blob) {
         try {
           await navigator.clipboard.write([
             new ClipboardItem({ "image/png": blob }),
           ]);
-          setCopyState("done");
-          setTimeout(() => setCopyState("idle"), 2000);
         } catch {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "limitless-trader-card.png";
-          a.click();
-          // Delay revoke to ensure browser reads the blob
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
-          setCopyState("idle");
+          /* clipboard not available — user will tweet text only */
         }
-      }, "image/png");
+      }
+      window.open(tweetUrl, "_blank");
     } catch {
-      setCopyState("idle");
+      // Last-resort fallback
+      window.open(tweetUrl, "_blank");
     }
-  }, [copyState]);
-
-  function handleShareX() {
-    if (!cardData) return;
-    const text = encodeURIComponent(
-      `I'm "${cardData.card.title}" on @trylimitless\n\n"${motivation}"\n\nDiscover your trader archetype 👇\nlimitless.exchange/card`
-    );
-    window.open(`https://x.com/intent/tweet?text=${text}`, "_blank");
-  }
+  }, [cardData, motivation, fetchCardImage]);
 
   /* ── Derived state ──────────────────────────────────────────────────────── */
 
@@ -510,7 +548,7 @@ export default function Home() {
                         <rect x="9" y="9" width="13" height="13" rx="2" />
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                       </svg>
-                      Save Image
+                      Copy Image
                     </>
                   )}
                 </button>
@@ -551,19 +589,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      {/* Hidden off-screen card for html2canvas screenshot */}
-      {cardData && (
-        <div
-          ref={cardRef}
-          className="fixed pointer-events-none"
-          style={{ left: "-9999px", top: 0 }}
-        >
-          <div style={{ width: "620px" }}>
-            <TraderCard data={cardData} />
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <footer className="relative z-10 px-6 sm:px-10 py-4">
