@@ -74,6 +74,10 @@ export interface AmmPosition {
   collateralAmount: string;
   outcomeIndex: number;
   outcomeTokenAmount: string;
+  // Already in decimal USDC, e.g. "1010.487684" or "-61.970459". "0" means the
+  // position is still open / not yet resolved.
+  realizedPnl?: string;
+  unrealizedPnl?: string;
   latestTrade?: { createdAt?: string };
   market: MarketInfo;
   account: string;

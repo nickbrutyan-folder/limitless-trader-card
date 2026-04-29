@@ -179,22 +179,29 @@ export function deriveData(
   let winRate = -1;
   let winRateSource: "realisedPnl" | "resolved" | "dailyPnl" | "none" = "none";
 
-  // Candidate: realisedPnl from CLOB positions
-  const pnlPositions = clobPositions.filter((pos) => {
-    const yp = Number(pos.positions?.yes?.realisedPnl ?? 0);
-    const np = Number(pos.positions?.no?.realisedPnl ?? 0);
-    return yp !== 0 || np !== 0;
-  });
-  let rpnlRate = -1;
-  if (pnlPositions.length >= 2) {
-    let wins = 0;
-    for (const pos of pnlPositions) {
-      const yp = rawToUsdc(pos.positions?.yes?.realisedPnl ?? "0");
-      const np = rawToUsdc(pos.positions?.no?.realisedPnl ?? "0");
-      if (yp > 0 || np > 0) wins++;
+  // Candidate: realized PnL across CLOB + AMM closed positions.
+  // CLOB realisedPnl is raw 6-decimal USDC, split by yes/no side.
+  // AMM realizedPnl is a single decimal-USDC string per position.
+  // A "win" = closed position whose total realized PnL is positive.
+  let rpnlClosed = 0;
+  let rpnlWins = 0;
+  for (const pos of clobPositions) {
+    const yp = rawToUsdc(pos.positions?.yes?.realisedPnl ?? "0");
+    const np = rawToUsdc(pos.positions?.no?.realisedPnl ?? "0");
+    const total = yp + np;
+    if (total !== 0) {
+      rpnlClosed++;
+      if (total > 0) rpnlWins++;
     }
-    rpnlRate = wins / pnlPositions.length;
   }
+  for (const pos of ammPositions) {
+    const pnl = Number(pos.realizedPnl ?? 0);
+    if (pnl !== 0) {
+      rpnlClosed++;
+      if (pnl > 0) rpnlWins++;
+    }
+  }
+  const rpnlRate = rpnlClosed >= 2 ? rpnlWins / rpnlClosed : -1;
 
   // Candidate: resolved positions with winning outcome
   const resolvedPositions = clobPositions.filter(
@@ -224,7 +231,7 @@ export function deriveData(
 
   // Pick the method with the MOST data points (most statistically reliable)
   const candidates: { rate: number; count: number; source: DerivedData["winRateSource"] }[] = [];
-  if (rpnlRate >= 0) candidates.push({ rate: rpnlRate, count: pnlPositions.length, source: "realisedPnl" });
+  if (rpnlRate >= 0) candidates.push({ rate: rpnlRate, count: rpnlClosed, source: "realisedPnl" });
   if (resolvedRate >= 0) candidates.push({ rate: resolvedRate, count: resolvedPositions.length, source: "resolved" });
   if (dailyRate >= 0) candidates.push({ rate: dailyRate, count: dailyDeltas.length, source: "dailyPnl" });
 
