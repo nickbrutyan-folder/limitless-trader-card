@@ -113,6 +113,17 @@ export function PageClient() {
       setStage("revealing");
       setIsCharging(false);
 
+      // Pre-warm the og:image cache. As soon as the user sees their card, fire
+      // a background request to /api/card-image so the PNG is rendered and
+      // CDN-cached. By the time they click Share on X, Twitter's crawler hits
+      // a warm response (~300ms) instead of cold (~5s) and can promote the
+      // unfurl from `summary` to `summary_large_image` mode reliably.
+      const wallet = data.cardData.walletAddress;
+      fetch(`/api/card-image?wallet=${encodeURIComponent(wallet)}`, {
+        method: "GET",
+        cache: "force-cache",
+      }).catch(() => { /* best-effort */ });
+
       // Clear any previous reveal timeouts before scheduling new ones
       revealTimeouts.current.forEach(clearTimeout);
 
