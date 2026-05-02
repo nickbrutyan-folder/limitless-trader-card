@@ -268,9 +268,12 @@ export function deriveData(
     resolvedRate = resolvedWins / resolvedPositions.length;
   }
 
-  // Candidate: daily P&L deltas (profitable days ratio, capped at 80%)
+  // Candidate: daily P&L deltas (profitable days ratio, capped at 80%).
+  // Threshold lowered from 7 → 3 so wallets with sparse chart history but
+  // some real activity (e.g. 1 open position + 4-6 chart datapoints) still
+  // get a usable estimate instead of an unhelpful "—".
   let dailyRate = -1;
-  if (dailyDeltas.length >= 7) {
+  if (dailyDeltas.length >= 3) {
     const profitableDays = dailyDeltas.filter((d) => d > 0).length;
     dailyRate = Math.min(profitableDays / dailyDeltas.length, 0.80);
   }
