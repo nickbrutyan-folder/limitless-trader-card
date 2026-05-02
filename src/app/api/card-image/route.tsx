@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import {
   fetchPortfolioData,
   fetchMarketDetails,
@@ -21,19 +23,26 @@ const ACCENT = "#C3FF00";
 const BRAND_PATH =
   "M413.468 218.013H352.889L434.511 134.701L435 134.207L405.25 104.415H324.308V86.2778C324.308 74.5475 314.779 65 303.063 65H216.211C204.495 65 194.971 74.5425 194.971 86.2778V239.432H86.5317C74.821 239.432 65.2923 248.979 65.2923 260.709C65.2923 272.44 74.821 281.987 86.5317 281.987H147.111L65.4888 365.269L65 365.763L94.7453 395.555H175.692V413.722C175.692 425.452 185.221 435 196.932 435H283.784C295.495 435 305.029 425.458 305.029 413.722V260.568H413.468C425.184 260.568 434.713 251.026 434.713 239.291C434.713 227.555 425.184 218.013 413.468 218.013ZM296.19 413.722C296.19 420.568 290.627 426.143 283.789 426.143C276.951 426.143 271.388 420.573 271.388 413.722V291.873L181.84 383.265L164.304 365.702L255.042 273.125H173.384C166.546 273.125 160.983 267.555 160.983 260.704C160.983 253.854 166.546 248.284 173.384 248.284H277.873C287.977 248.284 296.19 256.515 296.19 266.633V413.722ZM413.468 251.711H308.974C298.876 251.711 290.657 243.48 290.657 233.367V86.2778C290.657 79.4322 296.22 73.8569 303.058 73.8569C309.896 73.8569 315.459 79.4272 315.459 86.2778V208.127L405.008 116.7L422.544 134.263L331.806 226.875H413.463C420.301 226.875 425.864 232.445 425.864 239.296C425.864 246.146 420.301 251.716 413.463 251.716L413.468 251.711Z";
 
-// Inter weights are loaded from the official Inter GitHub release. Cached at
-// the fetch layer (Next.js dedupes per-request), and the response is cached at
-// the route layer for 1h.
-async function loadFont(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url, { next: { revalidate: 3600 * 24 * 7 } });
-  if (!res.ok) throw new Error(`Font load failed: ${url}`);
-  return res.arrayBuffer();
-}
+// Fonts are bundled in /public/fonts/ — read from disk at request time so the
+// image route doesn't make a network call to a font CDN (saves ~500ms-2s of
+// cold-start time, which is critical because Twitter / Slack / etc. crawlers
+// often time out at 3-5s when fetching og:image URLs).
+let cachedBold: Buffer | null = null;
+let cachedMedium: Buffer | null = null;
 
-const INTER_BOLD =
-  "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-700-normal.woff";
-const INTER_MEDIUM =
-  "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-500-normal.woff";
+async function loadInter(): Promise<{ bold: Buffer; medium: Buffer }> {
+  if (cachedBold && cachedMedium) {
+    return { bold: cachedBold, medium: cachedMedium };
+  }
+  const fontsDir = path.join(process.cwd(), "public", "fonts");
+  const [bold, medium] = await Promise.all([
+    readFile(path.join(fontsDir, "Inter-Bold.woff")),
+    readFile(path.join(fontsDir, "Inter-Medium.woff")),
+  ]);
+  cachedBold = bold;
+  cachedMedium = medium;
+  return { bold, medium };
+}
 
 function isValidAddress(addr: string): boolean {
   return /^0x[0-9a-fA-F]{40}$/.test(addr);
@@ -80,10 +89,7 @@ export async function GET(req: NextRequest) {
 
     const winRateText = winRate === -1 ? "—" : `${winRate}%`;
 
-    const [interBold, interMedium] = await Promise.all([
-      loadFont(INTER_BOLD),
-      loadFont(INTER_MEDIUM),
-    ]);
+    const { bold: interBold, medium: interMedium } = await loadInter();
 
     return new ImageResponse(
       (
@@ -253,7 +259,11 @@ export async function GET(req: NextRequest) {
           },
         ],
         headers: {
-          "Cache-Control": "public, max-age=300, s-maxage=300",
+          // 1h browser cache + 24h CDN cache + 7d stale-while-revalidate so the
+          // first Twitterbot fetch is the only slow one; subsequent unfurls
+          // are served instantly.
+          "Cache-Control":
+            "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
           "Content-Disposition": `inline; filename="trader-card-${wallet.slice(0, 10)}.png"`,
         },
       }
