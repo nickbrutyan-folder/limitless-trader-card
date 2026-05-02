@@ -237,8 +237,13 @@ describe("deriveData — win rate", () => {
     const losing = makeClobPosition({
       positions: { yes: { cost: "100000000", fillPrice: "500000", marketValue: "0", realisedPnl: "-30000000", unrealizedPnl: "0" } },
     });
+    // 2-point pnl chart → 1 delta, below the dailyPnl threshold (3), so the
+    // realisedPnl candidate is the only one active and is selected.
     const d = deriveData(
-      makeRawPortfolio({ clob: [winning, winning, losing] }),
+      makeRawPortfolio({
+        clob: [winning, winning, losing],
+        pnl: [{ timestamp: 1, value: 0 }, { timestamp: 2, value: 50 }],
+      }),
       emptyMarketDetails,
     );
     // 2 wins out of 3
