@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface WalletInputProps {
   onSubmit: (wallet: string) => void;
@@ -12,13 +12,19 @@ export function WalletInput({ onSubmit, loading, prefill }: WalletInputProps) {
   const [wallet, setWallet] = useState(prefill ?? "");
   const [touched, setTouched] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [lastPrefill, setLastPrefill] = useState(prefill);
 
-  useEffect(() => {
+  // Sync state when the prefill prop changes. This is the React-recommended
+  // "store information from previous renders" pattern — avoids the cascading-
+  // render warning that calling setState inside useEffect would trigger.
+  // https://react.dev/reference/react/useState#storing-information-from-previous-renders
+  if (prefill !== lastPrefill) {
+    setLastPrefill(prefill);
     if (prefill) {
       setWallet(prefill);
       setTouched(false);
     }
-  }, [prefill]);
+  }
 
   const isValid = /^0x[0-9a-fA-F]{40}$/.test(wallet.trim());
   const showError = touched && wallet.length > 0 && !isValid;

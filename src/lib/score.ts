@@ -17,12 +17,6 @@ const clamp = (v: number, max = 150) => Math.max(0, Math.min(max, v));
 /** Treat -1 (unknown win rate) as 0 for scoring purposes */
 const wr = (d: DerivedData) => Math.max(d.winRate, 0);
 
-/** Returns score proportional to how far a value exceeds a threshold */
-function exceeds(value: number, threshold: number, scale = 1): number {
-  if (value <= threshold) return 0;
-  return clamp(((value - threshold) / (threshold * scale)) * 100);
-}
-
 /** Standard deviation of an array */
 function stdDev(arr: number[]): number {
   if (arr.length < 2) return 0;
