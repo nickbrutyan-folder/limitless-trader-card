@@ -47,6 +47,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
         card: "summary_large_image",
         title: baseTitle,
         description: baseDescription,
+        site: "@trylimitless",
       },
     };
   }
@@ -79,6 +80,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       title: shareTitle,
       description: shareDescription,
       images: [imageUrl],
+      site: "@trylimitless",
     },
   };
 }
