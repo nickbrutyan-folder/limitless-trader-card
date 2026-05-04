@@ -282,18 +282,15 @@ export function PageClient() {
   const handleShareX = useCallback(async () => {
     if (!cardData) return;
 
-    // Build a shareable URL that includes ?wallet=... so the page can render
-    // wallet-specific og:image / twitter:image meta. When Twitter crawls this
-    // URL, it unfurls the actual card preview inline in the tweet — image
-    // attaches without any manual paste required.
+    // Share the bare landing URL — never expose the user's wallet address in
+    // the public tweet. Recipients land on the landing page and reveal their
+    // OWN card (the intended viral loop). On mobile, the actual card image
+    // is still attached via Web Share API below; on desktop the tweet posts
+    // text + the generic landing URL.
     const shareUrl =
       typeof window !== "undefined"
-        ? (() => {
-            const u = new URL(window.location.href);
-            u.searchParams.set("wallet", cardData.walletAddress);
-            return u.toString();
-          })()
-        : `https://limitless.exchange/card?wallet=${cardData.walletAddress}`;
+        ? `${window.location.origin}${window.location.pathname}`
+        : "https://limitless.exchange/card";
 
     const text = `I'm "${cardData.card.title}" on @trylimitless.\n\n"${motivation}"\n\nWhat kind of trader are you? 👇`;
     const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
